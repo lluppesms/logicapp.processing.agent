@@ -1,5 +1,3 @@
-using Processor.Agent.Data.Models;
-
 namespace Processor.Agent.Intake.Repositories;
 
 public interface ICosmosRepository

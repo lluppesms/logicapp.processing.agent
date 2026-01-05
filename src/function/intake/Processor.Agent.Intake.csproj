@@ -26,7 +26,7 @@
 </ItemGroup>
 
 <ItemGroup>
-  <ProjectReference Include="..\data\Processor.Agent.Data.csproj" />
+  <ProjectReference Include="..\..\..\..\logicapp.processing.agent-gh-lluppesms\src\data\Processor.Agent.Data.csproj" />
 </ItemGroup>
 
 </Project>

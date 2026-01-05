@@ -1,9 +1,3 @@
-using Processor.Agent.Intake.Repositories;
-using Processor.Agent.Data.Models;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using System.Net.Mail;
-
 namespace Processor.Agent.Intake.Services;
 
 public class ValidationService(ICosmosRepository repository, IMemoryCache cache, ILogger<ValidationService> logger) : IValidationService

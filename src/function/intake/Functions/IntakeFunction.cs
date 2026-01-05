@@ -1,12 +1,3 @@
-using Processor.Agent.Intake.Repositories;
-using Processor.Agent.Intake.Services;
-using Processor.Agent.Data.Models;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Text.Json;
-
 namespace Processor.Agent.Intake.Functions;
 
 public class IntakeFunction(ILogger<IntakeFunction> logger, IValidationService validationService, ICosmosRepository repository)

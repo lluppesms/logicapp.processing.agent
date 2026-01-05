@@ -1,5 +1,3 @@
-using Processor.Agent.Data.Models;
-
 namespace Processor.Agent.Intake.Services;
 
 public interface IValidationService

@@ -1,9 +1,3 @@
-using Microsoft.Azure.Cosmos;
-using Processor.Agent.Data.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-
 namespace Processor.Agent.Intake.Repositories;
 
 public class CosmosRepository : ICosmosRepository

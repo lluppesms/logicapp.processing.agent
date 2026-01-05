@@ -1,7 +1,7 @@
 // // --------------------------------------------------------------------------------
 // // This BICEP file will create a KeyVault secret for function app authentication key
 // // Test:
-// //   az deployment group create -n "manual-$(Get-Date -Format 'yyyyMMdd-HHmmss')" --resource-group rg-math-dev --template-file './modules/security/keyvault-function-secret.bicep' --parameters keyVaultName=mathstormkvdev secretName=functionAppApiKey functionAppName=mathstorm-func-dev functionAppResourceGroup=rg-math-dev
+// //   az deployment group create -n "manual-$(Get-Date -Format 'yyyyMMdd-HHmmss')" --resource-group rg-lapagent-dev --template-file './modules/security/keyvault-function-secret.bicep' --parameters keyVaultName=lapagentkvdev secretName=functionAppApiKey functionAppName=lapagent-func-dev functionAppResourceGroup=rg-lapagent-dev
 // // --------------------------------------------------------------------------------
 // param keyVaultName string
 // param secretName string

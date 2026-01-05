@@ -11,15 +11,17 @@ The Intake Processor watches a Cosmos DB table for new records. When a new recor
 
 ## Record Data
 
-Each intake request includes the following fields:
+Each intake request uses the shared `ProcessRequest` model from the `Processor.Agent.Data` project, which includes:
 
-- **UniqueRecordId** (required): Unique identifier for this record
+- **Id** (required): Unique identifier for this record
 - **RequestorName** (required): Name of the person making the request
 - **RequestorEmail** (required): Email address of the requestor (validated for proper format)
 - **JobTitle** (required): Job title of the requestor
 - **ProcessRequested** (required): The process being requested
 - **RequiredCompletionDate** (required): Date by which the process must be completed (must be in the future)
 - **Comments** (optional): Additional information or notes
+- **CreatedDate**: Timestamp when the request was created
+- **Status**: Current status of the request (default: "Pending")
 
 ## Project Structure
 
@@ -28,7 +30,6 @@ IntakeProcessor/
 ├── Functions/
 │   └── IntakeProcessorFunction.cs    # Main Cosmos DB trigger function
 ├── Models/
-│   ├── IntakeRequest.cs              # Data model for intake requests
 │   └── ValidationResult.cs           # Validation result model
 ├── Services/
 │   ├── IntakeValidator.cs            # Validates intake requests
@@ -38,6 +39,8 @@ IntakeProcessor/
 ├── host.json                         # Function host configuration
 └── local.settings.json               # Local development settings
 ```
+
+**Shared Models**: This project references `Processor.Agent.Data.csproj` for the `ProcessRequest` data model, ensuring consistency across all processing components.
 
 ## Configuration
 
@@ -67,7 +70,7 @@ Configure the following application settings in Azure:
 
 The validator ensures:
 
-1. **UniqueRecordId**: Must be present and non-empty
+1. **Id**: Must be present and non-empty
 2. **RequestorName**: Must be present and non-empty
 3. **RequestorEmail**: Must be present, non-empty, and in valid email format
 4. **JobTitle**: Must be present and non-empty
@@ -108,6 +111,7 @@ Note: For local development, you'll need:
 - Microsoft.Azure.Functions.Worker.Extensions.CosmosDB 4.12.0
 - Microsoft.Azure.Cosmos 3.45.0
 - Microsoft.ApplicationInsights.WorkerService 2.23.0
+- **Project Reference**: Processor.Agent.Data (shared data models)
 
 ## Deployment
 

@@ -1,4 +1,5 @@
 using IntakeProcessor.Models;
+using Processor.Agent.Data.Models;
 
 namespace IntakeProcessor.Services;
 
@@ -12,7 +13,7 @@ public interface IIntakeValidator
     /// </summary>
     /// <param name="request">The intake request to validate</param>
     /// <returns>A validation result indicating success or failure with error messages</returns>
-    ValidationResult Validate(IntakeRequest request);
+    ValidationResult Validate(ProcessRequest request);
 }
 
 /// <summary>
@@ -23,12 +24,12 @@ public class IntakeValidator : IIntakeValidator
     /// <summary>
     /// Validates an intake request to ensure all required fields are present and valid
     /// </summary>
-    public ValidationResult Validate(IntakeRequest request)
+    public ValidationResult Validate(ProcessRequest request)
     {
         var errors = new List<string>();
 
         // Validate unique record ID
-        if (string.IsNullOrWhiteSpace(request.UniqueRecordId))
+        if (string.IsNullOrWhiteSpace(request.Id))
         {
             errors.Add("Unique Record ID is required");
         }

@@ -1,7 +1,7 @@
-using IntakeProcessor.Models;
 using IntakeProcessor.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Processor.Agent.Data.Models;
 
 namespace IntakeProcessor.Functions;
 
@@ -36,7 +36,7 @@ public class IntakeProcessorFunction
             Connection = "CosmosDbConnectionString",
             LeaseContainerName = "leases",
             CreateLeaseContainerIfNotExists = true)]
-        IReadOnlyList<IntakeRequest> input)
+        IReadOnlyList<ProcessRequest> input)
     {
         if (input == null || input.Count == 0)
         {
@@ -62,7 +62,7 @@ public class IntakeProcessorFunction
     /// <summary>
     /// Processes a single intake request
     /// </summary>
-    private void ProcessIntakeRequest(IntakeRequest request)
+    private void ProcessIntakeRequest(ProcessRequest request)
     {
         _logger.LogInformation("Processing intake request from {RequestorName} ({RequestorEmail})",
             request.RequestorName, request.RequestorEmail);

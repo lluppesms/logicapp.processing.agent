@@ -13,21 +13,23 @@ All requirements from the issue have been successfully implemented:
 - **Azure Consumption Logic App compatible** - Implemented as Azure Functions which can be deployed to Azure Consumption plan
 - **Location**: All code stored in `/src/logicapp/intake` folder as required
 
-### ✅ Data Fields Implemented
-The `IntakeRequest` model includes all required fields:
+### ✅ Data Model
+Uses the shared `ProcessRequest` model from the `Processor.Agent.Data` project, which includes:
 
-1. **UniqueRecordId** (NEW REQUIREMENT) - Unique identifier for each record
+1. **Id** - Unique identifier for each record
 2. **RequestorName** - Name of the person making the request
 3. **RequestorEmail** - Email address of the requestor
 4. **JobTitle** - Job title of the requestor
 5. **ProcessRequested** - The process being requested
 6. **RequiredCompletionDate** - Date by which completion is required
 7. **Comments** - Optional additional information
+8. **CreatedDate** - Timestamp of record creation
+9. **Status** - Current processing status
 
 ### ✅ Validation Logic
 Comprehensive validation implemented in `IntakeValidator.cs`:
 
-- **UniqueRecordId**: Validates presence and non-empty value
+- **Id**: Validates presence and non-empty value
 - **RequestorName**: Validates presence and non-empty value
 - **RequestorEmail**: Validates presence, format, and proper email structure
 - **JobTitle**: Validates presence and non-empty value
@@ -39,7 +41,7 @@ Comprehensive validation implemented in `IntakeValidator.cs`:
 Professional HTML email formatting implemented in `EmailFormatter.cs`:
 
 - Responsive HTML design with professional styling
-- UniqueRecordId prominently displayed in highlighted section
+- Record ID prominently displayed in highlighted section
 - All fields clearly labeled and formatted
 - HTML encoding for security
 - Optional comments section shown only when present
@@ -50,18 +52,23 @@ Professional HTML email formatting implemented in `EmailFormatter.cs`:
 **Clean Architecture with Separation of Concerns:**
 ```
 ├── Functions/           # Cosmos DB trigger and orchestration
-├── Models/             # Data transfer objects
+├── Models/             # Validation models (uses shared ProcessRequest)
 ├── Services/           # Business logic (validation, formatting)
 └── SampleData/         # Example documents
 ```
 
+**Project References:**
+- References `Processor.Agent.Data.csproj` for shared data models
+- Ensures consistency across all processing components
+
 **Key Design Decisions:**
 
-1. **Dependency Injection**: All services registered in `Program.cs` for testability
-2. **Interface-based Services**: `IIntakeValidator` and `IEmailFormatter` for flexibility
-3. **Cosmos DB Change Feed**: Uses change feed trigger for real-time processing
-4. **Error Handling**: Comprehensive logging and graceful failure handling
-5. **Security**: HTML encoding prevents XSS attacks
+1. **Shared Data Models**: Uses `ProcessRequest` from the shared data project
+2. **Dependency Injection**: All services registered in `Program.cs` for testability
+3. **Interface-based Services**: `IIntakeValidator` and `IEmailFormatter` for flexibility
+4. **Cosmos DB Change Feed**: Uses change feed trigger for real-time processing
+5. **Error Handling**: Comprehensive logging and graceful failure handling
+6. **Security**: HTML encoding prevents XSS attacks
 
 ## Technical Implementation Details
 
@@ -93,6 +100,10 @@ All required packages included:
 - Microsoft.Azure.Cosmos (3.45.0)
 - Microsoft.ApplicationInsights.WorkerService (2.23.0)
 
+### Project References
+
+- `Processor.Agent.Data.csproj` - Shared data models
+
 ## Build & Test Results
 
 ✅ **Build Status**: SUCCESS (0 warnings, 0 errors)
@@ -105,13 +116,15 @@ A complete sample intake request is provided in `SampleData/sample-intake-reques
 
 ```json
 {
-  "uniqueRecordId": "REQ-2026-001",
+  "id": "req-2026-001-guid",
   "requestorName": "John Smith",
   "requestorEmail": "john.smith@example.com",
   "jobTitle": "Senior Developer",
   "processRequested": "Access Request for Production Database",
   "requiredCompletionDate": "2026-02-15T00:00:00Z",
-  "comments": "Need read-only access..."
+  "comments": "Need read-only access...",
+  "createdDate": "2026-01-05T23:00:00Z",
+  "status": "Pending"
 }
 ```
 
@@ -168,5 +181,6 @@ This implementation provides a robust, production-ready Azure Logic App solution
 - Provides professional email formatting
 - Has zero build warnings or security issues
 - Is fully documented and ready for deployment
+- Uses shared data models for consistency across the solution
 
-The UniqueRecordId field has been integrated throughout the solution as requested, appearing in the data model, validation logic, and prominently displayed in the formatted email output.
+The implementation leverages the shared `ProcessRequest` model from the `Processor.Agent.Data` project, ensuring data consistency across all processing components in the solution.

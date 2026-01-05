@@ -1,4 +1,4 @@
-using IntakeProcessor.Models;
+using Processor.Agent.Data.Models;
 using System.Text;
 
 namespace IntakeProcessor.Services;
@@ -13,14 +13,14 @@ public interface IEmailFormatter
     /// </summary>
     /// <param name="request">The intake request to format</param>
     /// <returns>Formatted email body as HTML</returns>
-    string FormatEmailBody(IntakeRequest request);
+    string FormatEmailBody(ProcessRequest request);
 
     /// <summary>
     /// Gets the email subject for an intake request
     /// </summary>
     /// <param name="request">The intake request</param>
     /// <returns>Email subject line</returns>
-    string GetEmailSubject(IntakeRequest request);
+    string GetEmailSubject(ProcessRequest request);
 }
 
 /// <summary>
@@ -31,7 +31,7 @@ public class EmailFormatter : IEmailFormatter
     /// <summary>
     /// Formats an intake request into an HTML email body
     /// </summary>
-    public string FormatEmailBody(IntakeRequest request)
+    public string FormatEmailBody(ProcessRequest request)
     {
         var sb = new StringBuilder();
         
@@ -56,7 +56,7 @@ public class EmailFormatter : IEmailFormatter
         
         sb.AppendLine("        <div class='record-id'>");
         sb.AppendLine($"            <span class='label'>Record ID:</span>");
-        sb.AppendLine($"            <span class='value'>{System.Net.WebUtility.HtmlEncode(request.UniqueRecordId)}</span>");
+        sb.AppendLine($"            <span class='value'>{System.Net.WebUtility.HtmlEncode(request.Id)}</span>");
         sb.AppendLine("        </div>");
         
         sb.AppendLine("        <div class='field'>");
@@ -107,7 +107,7 @@ public class EmailFormatter : IEmailFormatter
     /// <summary>
     /// Gets the email subject for an intake request
     /// </summary>
-    public string GetEmailSubject(IntakeRequest request)
+    public string GetEmailSubject(ProcessRequest request)
     {
         return $"New Intake Request: {request.ProcessRequested} - {request.RequestorName}";
     }

@@ -1,0 +1,11 @@
+{
+  "uniqueRecordId": "REQ-2026-001",
+  "requestorName": "John Smith",
+  "requestorEmail": "john.smith@example.com",
+  "jobTitle": "Senior Developer",
+  "processRequested": "Access Request for Production Database",
+  "requiredCompletionDate": "2026-02-15T00:00:00Z",
+  "comments": "Need read-only access to production database for troubleshooting customer issue #12345. Access should be limited to customer data tables only.",
+  "id": "req-2026-001-guid",
+  "partitionKey": "2026-01"
+}

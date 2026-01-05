@@ -1,27 +1,4 @@
-using Processor.Agent.Data.Models;
-using System.Text;
-
-namespace IntakeProcessor.Services;
-
-/// <summary>
-/// Service for formatting email content
-/// </summary>
-public interface IEmailFormatter
-{
-    /// <summary>
-    /// Formats an intake request into an email body
-    /// </summary>
-    /// <param name="request">The intake request to format</param>
-    /// <returns>Formatted email body as HTML</returns>
-    string FormatEmailBody(ProcessRequest request);
-
-    /// <summary>
-    /// Gets the email subject for an intake request
-    /// </summary>
-    /// <param name="request">The intake request</param>
-    /// <returns>Email subject line</returns>
-    string GetEmailSubject(ProcessRequest request);
-}
+namespace Processor.Agent.Acceptor.Services;
 
 /// <summary>
 /// Implementation of the email formatter
@@ -34,7 +11,7 @@ public class EmailFormatter : IEmailFormatter
     public string FormatEmailBody(ProcessRequest request)
     {
         var sb = new StringBuilder();
-        
+
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html>");
         sb.AppendLine("<head>");
@@ -53,37 +30,37 @@ public class EmailFormatter : IEmailFormatter
         sb.AppendLine("    <div class='container'>");
         sb.AppendLine("        <h2>New Intake Request</h2>");
         sb.AppendLine("        <p>A new intake request has been received and requires your attention.</p>");
-        
+
         sb.AppendLine("        <div class='record-id'>");
         sb.AppendLine($"            <span class='label'>Record ID:</span>");
         sb.AppendLine($"            <span class='value'>{System.Net.WebUtility.HtmlEncode(request.Id)}</span>");
         sb.AppendLine("        </div>");
-        
+
         sb.AppendLine("        <div class='field'>");
         sb.AppendLine($"            <span class='label'>Requestor Name:</span>");
         sb.AppendLine($"            <span class='value'>{System.Net.WebUtility.HtmlEncode(request.RequestorName)}</span>");
         sb.AppendLine("        </div>");
-        
+
         sb.AppendLine("        <div class='field'>");
         sb.AppendLine($"            <span class='label'>Requestor Email:</span>");
         sb.AppendLine($"            <span class='value'><a href='mailto:{System.Net.WebUtility.HtmlEncode(request.RequestorEmail)}'>{System.Net.WebUtility.HtmlEncode(request.RequestorEmail)}</a></span>");
         sb.AppendLine("        </div>");
-        
+
         sb.AppendLine("        <div class='field'>");
         sb.AppendLine($"            <span class='label'>Job Title:</span>");
         sb.AppendLine($"            <span class='value'>{System.Net.WebUtility.HtmlEncode(request.JobTitle)}</span>");
         sb.AppendLine("        </div>");
-        
+
         sb.AppendLine("        <div class='field'>");
         sb.AppendLine($"            <span class='label'>Process Requested:</span>");
         sb.AppendLine($"            <span class='value'>{System.Net.WebUtility.HtmlEncode(request.ProcessRequested)}</span>");
         sb.AppendLine("        </div>");
-        
+
         sb.AppendLine("        <div class='field'>");
         sb.AppendLine($"            <span class='label'>Required Completion Date:</span>");
         sb.AppendLine($"            <span class='value'>{request.RequiredCompletionDate:yyyy-MM-dd}</span>");
         sb.AppendLine("        </div>");
-        
+
         if (!string.IsNullOrWhiteSpace(request.Comments))
         {
             sb.AppendLine("        <div class='field'>");
@@ -93,14 +70,14 @@ public class EmailFormatter : IEmailFormatter
             sb.AppendLine("            </div>");
             sb.AppendLine("        </div>");
         }
-        
+
         sb.AppendLine("        <div class='footer'>");
         sb.AppendLine("            <p>This is an automated notification from the Intake Processor system.</p>");
         sb.AppendLine("        </div>");
         sb.AppendLine("    </div>");
         sb.AppendLine("</body>");
         sb.AppendLine("</html>");
-        
+
         return sb.ToString();
     }
 

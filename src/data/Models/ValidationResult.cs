@@ -1,4 +1,4 @@
-namespace IntakeProcessor.Models;
+namespace Processor.Agent.Data.Models;
 
 /// <summary>
 /// Represents the result of validating an intake request

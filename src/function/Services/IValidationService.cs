@@ -1,6 +1,6 @@
-using IntakeProcessor.Models;
+using Processor.Agent.Data.Models;
 
-namespace IntakeProcessor.Services;
+namespace Processor.Agent.Intake.Services;
 
 public interface IValidationService
 {

@@ -1,4 +1,4 @@
-namespace IntakeProcessor.Models;
+namespace Processor.Agent.Data.Models;
 
 public class RequestData
 {

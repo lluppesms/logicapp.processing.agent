@@ -1,5 +1,5 @@
-using IntakeProcessor.Repositories;
-using IntakeProcessor.Services;
+using Processor.Agent.Intake.Repositories;
+using Processor.Agent.Intake.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,28 +1,18 @@
-using IntakeProcessor.Models;
-using IntakeProcessor.Repositories;
+using Processor.Agent.Intake.Repositories;
+using Processor.Agent.Data.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 
-namespace IntakeProcessor.Services;
+namespace Processor.Agent.Intake.Services;
 
-public class ValidationService : IValidationService
+public class ValidationService(ICosmosRepository repository, IMemoryCache cache, ILogger<ValidationService> logger) : IValidationService
 {
-    private readonly ICosmosRepository _repository;
-    private readonly IMemoryCache _cache;
-    private readonly ILogger<ValidationService> _logger;
+    private readonly ICosmosRepository _repository = repository;
+    private readonly IMemoryCache _cache = cache;
+    private readonly ILogger<ValidationService> _logger = logger;
     private const string ProcessTypesCacheKey = "ProcessTypes";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(30);
-
-    public ValidationService(
-        ICosmosRepository repository,
-        IMemoryCache cache,
-        ILogger<ValidationService> logger)
-    {
-        _repository = repository;
-        _cache = cache;
-        _logger = logger;
-    }
 
     public async Task<(bool IsValid, List<string> Errors)> ValidateRequestAsync(RequestData request)
     {
@@ -56,7 +46,7 @@ public class ValidationService : IValidationService
             var isValidProcess = await IsValidProcessTypeAsync(request.ProcessRequested);
             if (!isValidProcess)
             {
-                errors.Add($"Process Requested '{request.ProcessRequested}' is not a valid process type");
+                errors.Add($"Process Requested '{request.ProcessRequested}' is not a valid process type (must be in the ProcessTypes table)");
             }
         }
 
@@ -81,7 +71,7 @@ public class ValidationService : IValidationService
     private async Task<bool> IsValidProcessTypeAsync(string processName)
     {
         var processTypes = await GetCachedProcessTypesAsync();
-        return processTypes.Any(pt => 
+        return processTypes.Any(pt =>
             pt.Name.Equals(processName, StringComparison.OrdinalIgnoreCase) && pt.IsActive);
     }
 
@@ -91,13 +81,12 @@ public class ValidationService : IValidationService
         {
             _logger.LogInformation("Process types not in cache, fetching from database");
             processTypes = await _repository.GetProcessTypesAsync();
-            
+
             var cacheOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(CacheDuration);
-            
+
             _cache.Set(ProcessTypesCacheKey, processTypes, cacheOptions);
-            _logger.LogInformation("Cached {Count} process types for {Duration} minutes", 
-                processTypes.Count(), CacheDuration.TotalMinutes);
+            _logger.LogInformation("Cached {Count} process types for {Duration} minutes", processTypes.Count(), CacheDuration.TotalMinutes);
         }
         else
         {

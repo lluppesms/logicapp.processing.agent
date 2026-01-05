@@ -1,11 +1,13 @@
 {
-    "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "CosmosDb:ConnectionString": "AccountEndpoint=https://your-cosmos-account.documents.azure.com:443/;AccountKey=your-key-here",
-        "CosmosDb:DatabaseName": "MathStormData-azd",
-        "CosmosDb:RequestsContainerName": "ProcessRequests",
-        "CosmosDb:ProcessTypesContainerName": "ProcessTypes"
-    }
+	"IsEncrypted": false,
+	"Values": {
+		"AzureWebJobsStorage": "UseDevelopmentStorage=true",
+		"FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+		"CosmosDb": {
+			"ConnectionString": "AccountEndpoint=https://your-cosmos-account.documents.azure.com:443/;AccountKey=your-key-here",
+			"DatabaseName": "lapagentData-azd",
+			"RequestsContainerName": "ProcessRequests",
+			"ProcessTypesContainerName": "ProcessTypes"
+		}
+	}
 }

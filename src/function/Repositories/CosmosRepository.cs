@@ -1,9 +1,10 @@
-using IntakeProcessor.Models;
 using Microsoft.Azure.Cosmos;
+using Processor.Agent.Data.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
-namespace IntakeProcessor.Repositories;
+namespace Processor.Agent.Intake.Repositories;
 
 public class CosmosRepository : ICosmosRepository
 {
@@ -12,20 +13,23 @@ public class CosmosRepository : ICosmosRepository
     private readonly Container _processTypesContainer;
     private readonly ILogger<CosmosRepository> _logger;
 
-    public CosmosRepository(
-        IConfiguration configuration,
-        ILogger<CosmosRepository> logger)
+    public CosmosRepository(IConfiguration configuration, ILogger<CosmosRepository> logger)
     {
         _logger = logger;
-        
-        var connectionString = configuration["CosmosDb:ConnectionString"] 
-            ?? throw new InvalidOperationException("CosmosDb:ConnectionString not configured");
-        var databaseName = configuration["CosmosDb:DatabaseName"] 
-            ?? throw new InvalidOperationException("CosmosDb:DatabaseName not configured");
+
+        var connectionString = configuration["CosmosDb:ConnectionString"] ?? throw new InvalidOperationException("CosmosDb:ConnectionString not configured");
+        var databaseName = configuration["CosmosDb:DatabaseName"]  ?? throw new InvalidOperationException("CosmosDb:DatabaseName not configured");
         var requestsContainerName = configuration["CosmosDb:RequestsContainerName"] ?? "ProcessRequests";
         var processTypesContainerName = configuration["CosmosDb:ProcessTypesContainerName"] ?? "ProcessTypes";
 
-        _cosmosClient = new CosmosClient(connectionString);
+        var cosmosOptions = new CosmosClientOptions
+        {
+            SerializerOptions = new CosmosSerializationOptions
+            {
+                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+            }
+        };
+        _cosmosClient = new CosmosClient(connectionString, cosmosOptions);
         _requestsContainer = _cosmosClient.GetContainer(databaseName, requestsContainerName);
         _processTypesContainer = _cosmosClient.GetContainer(databaseName, processTypesContainerName);
     }
@@ -34,10 +38,8 @@ public class CosmosRepository : ICosmosRepository
     {
         try
         {
-            var response = await _requestsContainer.CreateItemAsync(
-                request,
-                new PartitionKey(request.Id));
-            
+            var response = await _requestsContainer.CreateItemAsync(request, new PartitionKey(request.Id));
+
             _logger.LogInformation("Created request with ID: {RequestId}", request.Id);
             return response.Resource;
         }
@@ -55,14 +57,14 @@ public class CosmosRepository : ICosmosRepository
             var query = new QueryDefinition("SELECT * FROM c WHERE c.isActive = @isActive")
                 .WithParameter("@isActive", true);
             var iterator = _processTypesContainer.GetItemQueryIterator<ProcessType>(query);
-            
+
             var results = new List<ProcessType>();
             while (iterator.HasMoreResults)
             {
                 var response = await iterator.ReadNextAsync();
                 results.AddRange(response);
             }
-            
+
             _logger.LogInformation("Retrieved {Count} active process types", results.Count);
             return results;
         }

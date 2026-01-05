@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "IntakeProcessor": {
+    "Processor.Agent.Intake": {
       "commandName": "Project",
       "commandLineArgs": "--port 7240",
       "launchBrowser": false

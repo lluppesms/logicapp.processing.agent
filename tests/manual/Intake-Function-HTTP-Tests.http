@@ -1,0 +1,25 @@
+### Agent Application HTTP Tests
+### Use with REST Client extension in VS Code or similar tools
+
+@baseUrl = http://localhost:7240
+
+### ===================================================================
+### Basic Application Tests
+### ===================================================================
+
+### Test 1: Health Check / Root Endpoint
+GET {{baseUrl}}/
+Accept: text/html
+
+### Test 2: Post Data to Intake Function
+POST {{baseUrl}}/api/requests
+Content-Type: application/json
+
+{
+  "requestorName": "John Doe",
+  "requestorEmail": "john.doe@example.com",
+  "jobTitle": "Test This Process",
+  "processRequested": "PROCESS_TEST",
+  "requiredCompletionDate": "2026-02-15T00:00:00Z",
+  "comments": "Put some comments in here"
+}

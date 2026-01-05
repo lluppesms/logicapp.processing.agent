@@ -1,6 +1,6 @@
-using IntakeProcessor.Models;
+using Processor.Agent.Data.Models;
 
-namespace IntakeProcessor.Repositories;
+namespace Processor.Agent.Intake.Repositories;
 
 public interface ICosmosRepository
 {

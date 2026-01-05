@@ -80,10 +80,14 @@ var cosmosDatabaseName = 'MathStormData-${environmentCode}'
 var gameContainerName = 'Game'
 var userContainerName = 'GameUser' 
 var leaderboardContainerName = 'LeaderboardEntry'
+var processRequestsContainerName = 'ProcessRequests'
+var processTypesContainerName = 'ProcessTypes'
 var cosmosContainerArray = [
   { name: userContainerName, partitionKey: '/id' }
   { name: gameContainerName, partitionKey: '/id' }
   { name: leaderboardContainerName, partitionKey: '/id' }
+  { name: processRequestsContainerName, partitionKey: '/id' }
+  { name: processTypesContainerName, partitionKey: '/id' }
 ]
 module cosmosModule 'modules/database/cosmosdb.bicep' = {
   name: 'cosmos${deploymentSuffix}'

@@ -48,7 +48,10 @@ To optimize performance, the function caches valid process types from Cosmos DB 
 
 ## Configuration
 
-The function requires the following configuration values (in `local.settings.json` for local development or App Settings for Azure):
+The function requires the following configuration values. For local development:
+
+1. Copy `local.settings.json.sample` to `local.settings.json`
+2. Update the values with your Cosmos DB credentials
 
 ```json
 {
@@ -58,6 +61,8 @@ The function requires the following configuration values (in `local.settings.jso
   "CosmosDb:ProcessTypesContainerName": "ProcessTypes"
 }
 ```
+
+For Azure deployment, configure these values in the Function App Settings.
 
 ## Cosmos DB Setup
 

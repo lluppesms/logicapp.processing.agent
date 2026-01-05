@@ -1,0 +1,144 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# GHA Workflow to deploy Azure Resources and Function App
+# ------------------------------------------------------------------------------------------------------------------------
+# FYI: You need to set up some secrets before running this workflows - see CreateGitHubSecrets.md for details.
+# ------------------------------------------------------------------------------------------------------------------------
+name: 3.bicep.build.deploy.function
+run-name: '3 - Deploy Bicep/Build & Deploy Function: ${{ inputs.bicepDeploymentMode }} using ENV ${{ inputs.deployEnvironment }} by @${{ github.actor }}'
+on: 
+  workflow_dispatch:
+    inputs:
+      deployEnvironment:
+        description: Environment
+        default: 'dev' 
+        type: environment
+      createResourceGroup:
+        description: Create Resource Group?
+        type: boolean
+        default: true
+      runCreateInfra:
+        description: Deploy Bicep
+        default: true
+        type: boolean
+      bicepDeploymentMode:
+        description: Bicep Mode
+        default: create
+        type: choice
+        options:
+          - create
+          - whatIf
+      runBuild:
+        description: Build Function App
+        default: true
+        type: boolean
+      runDeploy:
+        description: Deploy Function App
+        default: true
+        type: boolean
+      runSecurityScan:
+        description: Run Security Scan
+        default: false
+        type: boolean
+      runSmokeTest:
+        description: Run Smoke Tests
+        default: false
+        type: boolean
+      logLevel:
+        description: Log level
+        required: false
+        default: 'warning' 
+        type: choice
+        options:
+          - info
+          - warning
+          - debug 
+
+# ------------------------------------------------------------------------------------------------------------------------
+permissions:
+  id-token: write
+  contents: write
+  actions: read
+  pages: write
+  security-events: write
+  checks: write
+  issues: read
+  pull-requests: read
+  packages: read
+
+# ------------------------------------------------------------------------------------------------------------------------
+jobs:
+  scan-code:
+    name: Scan Source Code
+    uses: ./.github/workflows/template-scan-code.yml
+    secrets: inherit
+    if: inputs.runSecurityScan
+    with:
+      runMSDevSecOpsScan: ${{ inputs.runSecurityScan }}
+      runGHASScan: ${{ inputs.runSecurityScan }}
+
+  # ------------------------------------------------------------------------------------------------------------------------
+  create-infra:
+    name: Create Infra ${{ inputs.deployEnvironment }}
+    uses: ./.github/workflows/template-create-infra.yml
+    secrets: inherit
+    with:
+      runCreateInfra: ${{ inputs.runCreateInfra }}
+      envCode: ${{ inputs.deployEnvironment }}
+      templatePath: './infra/Bicep/'
+      templateFile: 'main.bicep'
+      parameterFile: 'main.gha.bicepparam'
+      parameterFileReplaceTokens: 'true'
+      requestorName: ${{ github.actor }}
+      createResourceGroup: ${{ inputs.createResourceGroup }}
+      bicepDeploymentMode: ${{ inputs.bicepDeploymentMode }}
+
+# ------------------------------------------------------------------------------------------------------------------------
+  build-function:
+    name: Build Function App
+    uses: ./.github/workflows/template-function-app-build.yml
+    if: inputs.runBuild || inputs.runDeploy
+    needs: create-infra
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      rootDirectory: '${{ vars.FUNCTION_APP_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.FUNCTION_APP_PROJECT_NAME }}'
+      testDirectory: '${{ vars.FUNCTION_APP_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.FUNCTION_APP_TEST_PROJECT_NAME }}'
+      testApplication: true
+      listFilesAfterBuild: true
+
+# ------------------------------------------------------------------------------------------------------------------------
+  deploy-function:
+    name: Deploy Function App
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    if: inputs.runDeploy
+    needs: build-function
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      functionType: 'func'
+
+      
+# ------------------------------------------------------------------------------------------------------------------------
+  deploy-flex:
+    name: Deploy Flex Function
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    if: inputs.runDeploy
+    needs: build-function
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      functionType: 'flex'
+
+# ------------------------------------------------------------------------------------------------------------------------
+  run-smoke-test:
+    name: Smoke Test ${{ inputs.deployEnvironment }}
+    uses: ./.github/workflows/template-smoke-test.yml
+    if: inputs.runSmokeTest
+    needs: deploy-function
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      testPath: 'playwright/function-tests'
+      testType: 'function'

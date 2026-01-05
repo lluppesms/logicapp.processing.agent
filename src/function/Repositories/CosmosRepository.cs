@@ -52,7 +52,8 @@ public class CosmosRepository : ICosmosRepository
     {
         try
         {
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.isActive = true");
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.isActive = @isActive")
+                .WithParameter("@isActive", true);
             var iterator = _processTypesContainer.GetItemQueryIterator<ProcessType>(query);
             
             var results = new List<ProcessType>();

@@ -2,7 +2,7 @@ using IntakeProcessor.Models;
 using IntakeProcessor.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
+using System.Net.Mail;
 
 namespace IntakeProcessor.Services;
 
@@ -109,7 +109,14 @@ public class ValidationService : IValidationService
 
     private static bool IsValidEmail(string email)
     {
-        var emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-        return Regex.IsMatch(email, emailPattern);
+        try
+        {
+            var mailAddress = new MailAddress(email);
+            return mailAddress.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

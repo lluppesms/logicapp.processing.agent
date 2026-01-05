@@ -33,19 +33,19 @@ Secret Values:
 ``` bash
 gh auth login
 
-gh variable set APP_NAME -b lll-mathstorm
+gh variable set APP_NAME -b lll-lapagent
 gh variable set RESOURCEGROUP_LOCATION -b eastus
-gh variable set RESOURCEGROUP_PREFIX -b rg_mathstorm-webg 
+gh variable set RESOURCEGROUP_PREFIX -b rg_lapagent-webg 
 
-gh variable set APP_PROJECT_FOLDER_NAME -b src/web/MathStorm/MathStorm.Web
-gh variable set APP_PROJECT_NAME -b MathStorm.Web
-gh variable set APP_TEST_FOLDER_NAME -b src/web/MathStorm.Web.Tests/MathStorm.Web.Tests
-gh variable set APP_TEST_PROJECT_NAME -b MathStorm.Web.Tests
+gh variable set LA_PROJECT_FOLDER_NAME -b src/logicapp/lapagent/lapagent.Web
+gh variable set LA_PROJECT_NAME -b lapagent.logicapp
+gh variable set LA_TEST_FOLDER_NAME -b src/logicapp/lapagent.logicapp.Tests/lapagent.Web.Tests
+gh variable set LA_TEST_PROJECT_NAME -b lapagent.logicapp.Tests
 
-gh variable set FUNC_PROJECT_FOLDER_NAME -b src/functions/MathStorm.Functions
-gh variable set FUNC_PROJECT_NAME -b MathStorm.Functions
-gh variable set FUNC_TEST_FOLDER_NAME -b src/functions/MathStorm.Functions.Tests
-gh variable set FUNC_TEST_PROJECT_NAME -b MathStorm.Functions.Tests
+gh variable set FUNC_PROJECT_FOLDER_NAME -b src/function/lapagent.Functions
+gh variable set FUNC_PROJECT_NAME -b lapagent.Functions
+gh variable set FUNC_TEST_FOLDER_NAME -b src/function/lapagent.Functions.Tests
+gh variable set FUNC_TEST_PROJECT_NAME -b lapagent.Functions.Tests
 ```
 
 ---

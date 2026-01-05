@@ -86,7 +86,7 @@ Successfully created a .NET 10 Azure Function application that accepts HTTP requ
 ## Cosmos DB Setup
 
 ### Database
-- Name: `MathStormData-{environmentCode}`
+- Name: `lapagent-data-{environmentCode}`
 
 ### Containers
 

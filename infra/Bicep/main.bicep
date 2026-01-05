@@ -5,7 +5,7 @@
 // To deploy this Bicep manually:
 // 	 az login
 //   az account set --subscription <subscriptionId>
-//   az deployment group create -n "manual-$(Get-Date -Format 'yyyyMMdd-HHmmss')" --resource-group rg_Math.Storm_test --template-file 'main.bicep' --parameters appName=xxx-Math.Storm-test environmentCode=demo keyVaultOwnerUserId=xxxxxxxx-xxxx-xxxx
+//   az deployment group create -n "manual-$(Get-Date -Format 'yyyyMMdd-HHmmss')" --resource-group rg_lapagent_test --template-file 'main.bicep' --parameters appName=xxx-lapagent-test environmentCode=demo keyVaultOwnerUserId=xxxxxxxx-xxxx-xxxx
 // --------------------------------------------------------------------------------
 param appName string = ''
 param environmentCode string = 'azd'
@@ -76,16 +76,10 @@ module logAnalyticsWorkspaceModule 'modules/monitor/loganalytics.bicep' = {
 }
 
 // --------------------------------------------------------------------------------
-var cosmosDatabaseName = 'MathStormData-${environmentCode}'
-var gameContainerName = 'Game'
-var userContainerName = 'GameUser' 
-var leaderboardContainerName = 'LeaderboardEntry'
+var cosmosDatabaseName = 'lapagent-data-${environmentCode}'
 var processRequestsContainerName = 'ProcessRequests'
 var processTypesContainerName = 'ProcessTypes'
 var cosmosContainerArray = [
-  { name: userContainerName, partitionKey: '/id' }
-  { name: gameContainerName, partitionKey: '/id' }
-  { name: leaderboardContainerName, partitionKey: '/id' }
   { name: processRequestsContainerName, partitionKey: '/id' }
   { name: processTypesContainerName, partitionKey: '/id' }
 ]
@@ -236,9 +230,8 @@ module webSiteAppSettingsModule './modules/webapp/websiteappsettings.bicep' = {
       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
       CosmosDb__ConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       CosmosDb__DatabaseName: cosmosDatabaseName 
-      CosmosDb__ContainerNames__Users: userContainerName
-      CosmosDb__ContainerNames__Games: gameContainerName
-      CosmosDb__ContainerNames__Leaderboard: leaderboardContainerName
+      CosmosDb__ContainerNames__Requests: processRequestsContainerName
+      CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
       // OpenAI settings (now configured directly in web app)
       OpenAI__Models__gpt_4o_mini__DeploymentName: 'gpt-4o-mini'
       OpenAI__Models__gpt_4o_mini__Endpoint: OpenAI_Endpoint

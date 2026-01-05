@@ -1,6 +1,6 @@
 # Copilot Instructions
 
-The github repo is lluppesms/math.storm.ghcpa and the primary branch that I work off of is main.
+The github repo is lluppesms/logicapp.processing.agent and the primary branch that I work off of is main.
 
 ## File Organization
 - Keep related files together
@@ -9,7 +9,7 @@ The github repo is lluppesms/math.storm.ghcpa and the primary branch that I work
 - Group components by feature when possible
 
 ## Project Structure
-- Any actual source code should be located in the src folder. Organize each project into its own folder within src. For instance, put any website project into a src/web folder and any Azure Function projects into a src/functions folder.
+- Any actual source code should be located in the src folder. Organize each project into its own folder within src. For instance, put any website project into a src/web folder and any Azure Function projects into a src/function folder.
 - Any infrastructure code should be located in the infra folder, and put each type of IaC code into it's own folder, such as Bicep in the infra/bicep folder and Terraform in the infra/tf folder.
 - Any code for the GitHub Actions workflows should be located in the .github/workflows folder.
 - Any code for Azure DevOps pipelines should be located in the .azuredevops/pipelines folder.
@@ -81,7 +81,7 @@ The github repo is lluppesms/math.storm.ghcpa and the primary branch that I work
 - Test error scenarios
 - Mock external dependencies
 - Use MSTest for component testing
-- Create tests in the Math.Storm.tests project
+- Create tests in the LogicApp.Processing.Agent.Tests project
 
 ## Documentation
 - Document public APIs
@@ -99,7 +99,7 @@ The github repo is lluppesms/math.storm.ghcpa and the primary branch that I work
 
 ## C# Code Style
 - Use modern C# features (e.g., nullable reference types, async/await, expression-bodied members) where appropriate.
-- Organize code into clear namespaces reflecting folder structure (e.g., `Math.Storm.Web`, `Math.Storm.Tests`).
+- Organize code into clear namespaces reflecting folder structure (e.g., `LogicApp.Processing.Agent.Web`, `LogicApp.Processing.Agent.Tests`).
 - Use PascalCase for class, method, and property names; use camelCase for local variables and parameters.
 - Place using directives at the top of files, outside namespaces. Whenever a using directive is used more than once, place it into a globalUsings.cs file in the root of the project.
 - Prefer explicit access modifiers (public, private, etc.) for all members.

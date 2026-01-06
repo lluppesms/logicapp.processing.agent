@@ -16,7 +16,7 @@ param usePlaceholderDotNetIsolated string = '1'
 
 param cosmosAccountName string = ''
 
-param OpenAI_Gpt4o_DeploymentName string = 'gpt-4o-mini'
+param OpenAI_Gpt4o_DeploymentName string = 'gpt-5-mini'
 param OpenAI_Gpt4o_Endpoint string = ''
 param OpenAI_Gpt4o_ApiKey string = ''
 param OpenAI_Gpt35_DeploymentName string = 'gpt-35-turbo'

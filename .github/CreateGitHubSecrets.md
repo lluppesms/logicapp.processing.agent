@@ -16,7 +16,6 @@ To create these secrets, customize and run this command::
 gh auth login
 
 gh secret set AZURE_CLIENT_ID -b <GUID>
-gh secret set AZURE_CLIENT_SECRET -b <GUID>
 gh secret set AZURE_TENANT_ID -b <GUID>
 gh secret set AZURE_SUBSCRIPTION_ID -b <yourAzureSubscriptionId>
 ```
@@ -37,15 +36,16 @@ gh variable set APP_NAME -b lll-lapagent
 gh variable set RESOURCEGROUP_LOCATION -b eastus
 gh variable set RESOURCEGROUP_PREFIX -b rg_lapagent-webg 
 
-gh variable set LA_PROJECT_FOLDER_NAME -b src/logicapp/lapagent/lapagent.Web
-gh variable set LA_PROJECT_NAME -b lapagent.logicapp
-gh variable set LA_TEST_FOLDER_NAME -b src/logicapp/lapagent.logicapp.Tests/lapagent.Web.Tests
-gh variable set LA_TEST_PROJECT_NAME -b lapagent.logicapp.Tests
+gh variable set INTAKE_PROJECT_FOLDER_NAME -b src/intake-function
+gh variable set INTAKE_PROJECT_NAME -b Processor.Agent.Intake
+gh variable set INTAKE_TEST_FOLDER_NAME -b src/intake-function-tests
+gh variable set INTAKE_TEST_PROJECT_NAME -b Processor.Agent.Intake.Tests
 
-gh variable set FUNC_PROJECT_FOLDER_NAME -b src/function/lapagent.Functions
-gh variable set FUNC_PROJECT_NAME -b lapagent.Functions
-gh variable set FUNC_TEST_FOLDER_NAME -b src/function/lapagent.Functions.Tests
-gh variable set FUNC_TEST_PROJECT_NAME -b lapagent.Functions.Tests
+gh variable set ACCEPTOR_PROJECT_FOLDER_NAME -b src/acceptor-logicapp
+gh variable set ACCEPTOR_PROJECT_NAME -b Processor.Agent.Acceptor
+gh variable set ACCEPTOR_TEST_FOLDER_NAME -b src/acceptor-logicapp-tests
+gh variable set ACCEPTOR_TEST_PROJECT_NAME -b Processor.Agent.Acceptor.Tests
+
 ```
 
 Optional Values that can be set:
@@ -56,6 +56,9 @@ gh variable set MYIPADDRESS -b xxx
 
 gh variable set OPENAI_ENDPOINT -b xxx
 gh variable set OPENAI_APIKEY -b xxx
+gh variable set OPENAI_DEPLOYMENTNAME -b gpt-5-mini
+gh variable set OPENAI_MODELNAME -b gpt_5_mini
+gh variable set OPENAI_TEMPERATURE -b 0.8
 
 gh variable set EXISTING_SERVICEPLAN_NAME -b xxx
 gh variable set EXISTING_SERVICEPLAN_RESOURCEGROUP_NAME -b xxx

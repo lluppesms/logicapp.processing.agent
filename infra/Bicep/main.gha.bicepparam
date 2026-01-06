@@ -13,6 +13,9 @@ param deployCosmos = #{deployCosmos}#
 
 param OpenAI_Endpoint = '#{OPENAI_ENDPOINT}#'
 param OpenAI_ApiKey = '#{OPENAI_APIKEY}#'
+// param OpenAI_DeploymentName = '#{OPENAI_DEPLOYMENTNAME}#'
+// param OpenAI_ModelName = '#{OPENAI_MODELNAME}#'
+// param OpenAI_Temperature = '#{OPENAI_TEMPERATURE}#'
 
 param servicePlanName = '#{EXISTING_SERVICEPLAN_NAME}#'
 param servicePlanResourceGroupName = '#{EXISTING_SERVICEPLAN_RESOURCEGROUP_NAME}#'

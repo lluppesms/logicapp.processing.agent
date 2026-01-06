@@ -16,17 +16,14 @@ param servicePlanResourceGroupName string = '' // if using an existing service p
 param servicePlanKind string = 'linux' // 'linux' or 'windows'
 param servicePlanSku string = 'B1'
 
-// param functionStorageSku string = 'Standard_LRS'
-// param functionAppSku string = 'B1' //  'Y1'
-// param functionAppSkuFamily string = 'B' // 'Y'
-// param functionAppSkuTier string = 'Dynamic'
-// param environmentSpecificFunctionName string = ''
-
+// --------------------------------------------------------------------------------------------------------------
+// AI Foundry Parameters
+// --------------------------------------------------------------------------------------------------------------
 param OpenAI_Endpoint string
 @secure()
 param OpenAI_ApiKey string
-param OpenAI_DeploymentName string = 'gpt-4o-mini'
-param OpenAI_ModelName string = 'gpt_4o_mini'
+param OpenAI_DeploymentName string = 'gpt-5-mini'
+param OpenAI_ModelName string = 'gpt_5_mini'
 param OpenAI_Temperature string = '0.8'
 
 // --------------------------------------------------------------------------------------------------------------
@@ -242,12 +239,16 @@ module functionAppSettingsModule 'modules/functions/functionappsettings.bicep' =
       CosmosDb__DatabaseName: cosmosDatabaseName 
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
+      // Settings for Function with Cosmos trigger -- no sub levels
+      CosmosDbDatabaseName: cosmosDatabaseName 
+      CosmosDbContainerName: processRequestsContainerName
+      CosmosDbConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       // OpenAI settings (now configured directly in web app)
-      OpenAI__Models__gpt_4o_mini__DeploymentName: OpenAI_DeploymentName
-      OpenAI__Models__gpt_4o_mini__Endpoint: OpenAI_Endpoint
-      OpenAI__Models__gpt_4o_mini__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
-      OpenAI__DefaultModel: OpenAI_ModelName
-      OpenAI__Temperature: OpenAI_Temperature
+      OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
+      OpenAI__Chat__Endpoint: OpenAI_Endpoint
+      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
+      OpenAI__Chat__ModelName: OpenAI_ModelName
+      OpenAI__Chat__Temperature: OpenAI_Temperature
     }
   }
 }
@@ -289,12 +290,16 @@ module webSiteAppSettingsModule './modules/webapp/websiteappsettings.bicep' = {
       CosmosDb__DatabaseName: cosmosDatabaseName 
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
+      // Settings for Function with Cosmos trigger -- no sub levels
+      CosmosDbDatabaseName: cosmosDatabaseName 
+      CosmosDbContainerName: processRequestsContainerName
+      CosmosDbConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       // OpenAI settings (now configured directly in web app)
-      OpenAI__Models__gpt_4o_mini__DeploymentName: OpenAI_DeploymentName
-      OpenAI__Models__gpt_4o_mini__Endpoint: OpenAI_Endpoint
-      OpenAI__Models__gpt_4o_mini__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
-      OpenAI__DefaultModel: OpenAI_ModelName
-      OpenAI__Temperature: OpenAI_Temperature
+      OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
+      OpenAI__Chat__Endpoint: OpenAI_Endpoint
+      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
+      OpenAI__Chat__ModelName: OpenAI_ModelName
+      OpenAI__Chat__Temperature: OpenAI_Temperature
     }
   }
 }

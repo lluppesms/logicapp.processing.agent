@@ -45,4 +45,4 @@ output userAssignedIdentityName string   = toLower('${sanitizedAppName}-${resour
 output keyVaultName string = environmentCode == 'prod' ? take('${sanitizedAppName}${resourceAbbreviations.keyVaultVaults}prd', 24) : take('${sanitizedAppName}${resourceAbbreviations.keyVaultVaults}-${sanitizedEnvironment}', 24)
 output storageAccountName string         = take('${sanitizedAppName}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${dataStorageNameSuffix}', 24)
 output functionStorageName string        = take('${sanitizedAppName}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
-output functionFlexStorageName string    = take('$${sanitizedAppName}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionFlexStorageNameSuffix}', 24)
+output functionFlexStorageName string    = take('${sanitizedAppName}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionFlexStorageNameSuffix}', 24)

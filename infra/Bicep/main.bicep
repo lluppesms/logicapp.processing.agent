@@ -217,7 +217,7 @@ module functionFlexModule 'modules/functions/functionflex.bicep' = {
 }
 
 module functionFlexRoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
-  name: 'identity-roles${deploymentSuffix}'
+  name: 'function-roles${deploymentSuffix}'
   params: {
     identityPrincipalId: functionFlexModule.outputs.functionAppPrincipalId
     principalType: 'ServicePrincipal'

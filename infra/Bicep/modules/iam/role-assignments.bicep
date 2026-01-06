@@ -47,8 +47,9 @@ resource registry 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' ex
   // scope: resourceGroup(registryResourceGroupName)
 }
 module registry_Role_AcrPull 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addRegistryRoles) {
-  name: guid(registry.id, identityPrincipalId, roleDefinitions.containerregistry.acrPullRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${registryName}-acrPull'
   params: {
+    name: guid(registry.id, identityPrincipalId, roleDefinitions.containerregistry.acrPullRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: registry.id
@@ -66,8 +67,9 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   // scope: resourceGroup(appInsightsResourceGroupName)
 }
 module appInsights_Role_MonitoringMetricsPublisher 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addAppInsightsRoles) {
-  name: guid(applicationInsights.id, identityPrincipalId, roleDefinitions.appinsights.monitoringMetricsPublisherRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${appInsightsName}-monitoringMetricsPublisher'
   params: {
+    name: guid(applicationInsights.id, identityPrincipalId, roleDefinitions.appinsights.monitoringMetricsPublisherRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: applicationInsights.id
@@ -85,8 +87,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' existing 
   // scope: resourceGroup(storageResourceGroupName)
 }
 module storage_Role_BlobContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addStorageRoles) {
-  name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.blobDataContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${storageAccountName}-blobDataContributor'
   params: {
+    name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.blobDataContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: storageAccount.id
@@ -96,8 +99,9 @@ module storage_Role_BlobContributor 'br/public:avm/ptn/authorization/resource-ro
   }
 }
 module storage_Role_BlobOwner 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addStorageRoles) {
-  name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.blobDataOwnerRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${storageAccountName}-blobDataOwner'
   params: {
+    name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.blobDataOwnerRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: storageAccount.id
@@ -107,8 +111,9 @@ module storage_Role_BlobOwner 'br/public:avm/ptn/authorization/resource-role-ass
   }
 }
 module storage_Role_TableContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addStorageRoles) {
-  name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.tableContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${storageAccountName}-tableContributor'
   params: {
+    name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.tableContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: storageAccount.id
@@ -118,8 +123,9 @@ module storage_Role_TableContributor 'br/public:avm/ptn/authorization/resource-r
   }
 }
 module storage_Role_QueueContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addStorageRoles) {
-  name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.queueDataContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${storageAccountName}-queueContributor'
   params: {
+    name: guid(storageAccount.id, identityPrincipalId, roleDefinitions.storage.queueDataContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: storageAccount.id
@@ -137,8 +143,9 @@ resource aiService 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' exi
   // scope: resourceGroup(aiServicesResourceGroupName)
 }
 module cognitiveServices_Role_OpenAIUser 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addCogServicesRoles) {
-  name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesOpenAIUserRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiServicesName}-openAIUser'
   params: {
+    name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesOpenAIUserRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: aiService.id
@@ -148,8 +155,9 @@ module cognitiveServices_Role_OpenAIUser 'br/public:avm/ptn/authorization/resour
   }
 }
 module cognitiveServices_Role_OpenAIContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addCogServicesRoles) {
-  name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesOpenAIContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiServicesName}-openAIContributor'
   params: {
+    name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesOpenAIContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: aiService.id
@@ -159,8 +167,9 @@ module cognitiveServices_Role_OpenAIContributor 'br/public:avm/ptn/authorization
   }
 }
 module cognitiveServices_Role_User 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addCogServicesRoles) {
-  name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesUserRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiServicesName}-cognitiveServicesUser'
   params: {
+    name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesUserRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: aiService.id
@@ -170,8 +179,9 @@ module cognitiveServices_Role_User 'br/public:avm/ptn/authorization/resource-rol
   }
 }
 module cognitiveServices_Role_Contributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addCogServicesRoles) {
-  name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiServicesName}-cognitiveServicesContributor'
   params: {
+    name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: aiService.id
@@ -181,8 +191,9 @@ module cognitiveServices_Role_Contributor 'br/public:avm/ptn/authorization/resou
   }
 }
 module cognitiveServices_Role_AzureAIEngineer 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addCogServicesRoles) {
-  name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesAzureAIEngineerRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiServicesName}-azureAIEngineer'
   params: {
+    name: guid(aiService.id, identityPrincipalId, roleDefinitions.openai.cognitiveServicesAzureAIEngineerRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: aiService.id
@@ -200,8 +211,9 @@ resource searchService 'Microsoft.Search/searchServices@2024-06-01-preview' exis
   // scope: resourceGroup(aiSearchResourceGroupName)
 }
 module search_Role_IndexDataContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addSearchRoles) {
-  name: guid(searchService.id, identityPrincipalId, roleDefinitions.search.indexDataContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiSearchName}-indexDataContributor'
   params: {
+    name: guid(searchService.id, identityPrincipalId, roleDefinitions.search.indexDataContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: searchService.id
@@ -211,8 +223,9 @@ module search_Role_IndexDataContributor 'br/public:avm/ptn/authorization/resourc
   }
 }
 module search_Role_IndexDataReader 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addSearchRoles) {
-  name: guid(searchService.id, identityPrincipalId, roleDefinitions.search.indexDataReaderRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiSearchName}-indexDataReader'
   params: {
+    name: guid(searchService.id, identityPrincipalId, roleDefinitions.search.indexDataReaderRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: searchService.id
@@ -222,8 +235,9 @@ module search_Role_IndexDataReader 'br/public:avm/ptn/authorization/resource-rol
   }
 }
 module search_Role_ServiceContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addSearchRoles) {
-  name: guid(searchService.id, identityPrincipalId, roleDefinitions.search.serviceContributorRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${aiSearchName}-serviceContributor'
   params: {
+    name: guid(searchService.id, identityPrincipalId, roleDefinitions.search.serviceContributorRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: searchService.id
@@ -241,8 +255,9 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' existing = if (
   //scope: resourceGroup(keyVaultNameResourceGroupName)
 }
 module keyVault_Role_SecretsOfficer 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addKeyVaultRoles) {
-  name: guid(keyVault.id, identityPrincipalId, roleDefinitions.keyvault.secretsOfficerRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${keyVaultName}-secretsOfficer'
   params: {
+    name: guid(keyVault.id, identityPrincipalId, roleDefinitions.keyvault.secretsOfficerRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: keyVault.id
@@ -252,8 +267,9 @@ module keyVault_Role_SecretsOfficer 'br/public:avm/ptn/authorization/resource-ro
   }
 }
 module keyVault_Role_SecretsUser 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addKeyVaultRoles) {
-  name: guid(keyVault.id, identityPrincipalId, roleDefinitions.keyvault.secretsUserRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${keyVaultName}-secretsUser'
   params: {
+    name: guid(keyVault.id, identityPrincipalId, roleDefinitions.keyvault.secretsUserRoleId)
     principalId: identityPrincipalId
     principalType: principalType
     resourceId: keyVault.id
@@ -272,8 +288,9 @@ resource apimService 'Microsoft.ApiManagement/service@2024-05-01' existing = if 
 }
 
 module apimReaderAssignment 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (addApimRoles) {
-  name: guid(apimService.id, identityPrincipalId, roleDefinitions.apim.serviceReaderRoleId)
+  name: 'role-assignment-${identityPrincipalId}-${apimName}-serviceReader'
   params: {
+    name: guid(apimService.id, identityPrincipalId, roleDefinitions.apim.serviceReaderRoleId)
     principalId: identityPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleDefinitions.apim.serviceReaderRoleId)
     principalType: principalType

@@ -32,9 +32,9 @@ Secret Values:
 ``` bash
 gh auth login
 
-gh variable set APP_NAME -b lll-lapagent
+gh variable set APP_NAME -b XXX-lapagent
 gh variable set RESOURCEGROUP_LOCATION -b eastus
-gh variable set RESOURCEGROUP_PREFIX -b rg_lapagent-webg 
+gh variable set RESOURCEGROUP_PREFIX -b rg_lapagent-web
 
 gh variable set INTAKE_PROJECT_FOLDER_NAME -b src/intake-function
 gh variable set INTAKE_PROJECT_NAME -b Processor.Agent.Intake

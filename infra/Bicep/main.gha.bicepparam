@@ -17,8 +17,8 @@ param OpenAI_ApiKey = '#{OPENAI_APIKEY}#'
 // param OpenAI_ModelName = '#{OPENAI_MODELNAME}#'
 // param OpenAI_Temperature = '#{OPENAI_TEMPERATURE}#'
 
-param servicePlanName = '#{EXISTING_SERVICEPLAN_NAME}#'
-param servicePlanResourceGroupName = '#{EXISTING_SERVICEPLAN_RESOURCE_GROUP_NAME}#'
+// param servicePlanName = '#{EXISTING_SERVICEPLAN_NAME}#'
+// param servicePlanResourceGroupName = '#{EXISTING_SERVICEPLAN_RESOURCE_GROUP_NAME}#'
 
 // ----------------------------------------------------------------------------------------------------
 // Experiment: change this to read environment instead of using Quezta replace

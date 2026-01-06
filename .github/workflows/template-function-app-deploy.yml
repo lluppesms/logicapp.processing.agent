@@ -28,7 +28,7 @@ jobs:
 
     env:
       artifactName: functionapp
-      generatedAppEnvName: ${{ vars.APP_NAME }}-func-${{ inputs.envCode }}
+      generatedAppEnvName: ${{ vars.ACCEPTOR_NAME }}-func-${{ inputs.envCode }}
       #Bicep: var functionAppName = environmentSpecificFunctionName == '' ? environmentCode == 'azd' ? '${lowerAppName}function' : toLower('${lowerAppName}-func-${sanitizedEnvironment}') : environmentSpecificFunctionName
 
     steps:

@@ -101,10 +101,10 @@ jobs:
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.FUNCTION_APP_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.FUNCTION_APP_PROJECT_NAME }}'
-      testDirectory: '${{ vars.FUNCTION_APP_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.FUNCTION_APP_TEST_PROJECT_NAME }}'
+      rootDirectory: '${{ vars.INTAKE_APP_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.INTAKE_APP_PROJECT_NAME }}'
+      testDirectory: '${{ vars.INTAKE_APP_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.INTAKE_APP_TEST_PROJECT_NAME }}'
       testApplication: true
       listFilesAfterBuild: true
 

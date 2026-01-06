@@ -106,10 +106,10 @@ jobs:
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.APP_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.APP_PROJECT_NAME }}'
-      testDirectory: '${{ vars.APP_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.APP_TEST_PROJECT_NAME }}'
+      rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
+      testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
       testApplication: true
       listFilesAfterBuild: true
 

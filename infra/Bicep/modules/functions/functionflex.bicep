@@ -6,87 +6,56 @@ param functionAppName string
 param functionAppServicePlanName string
 param functionInsightsName string
 param functionStorageAccountName string
-@allowed([ 'functionapp', 'functionapp,linux' ])
+
+param customAppSettings object = {}
+
+@allowed(['functionapp', 'functionapp,linux'])
 param functionKind string = 'functionapp,linux'
 param runtimeName string = 'dotnet-isolated'
 param runtimeVersion string = '10.0'
 @minValue(10)
 @maxValue(1000)
 param maximumInstanceCount int = 50
-@allowed([512,2048,4096])
+@allowed([512, 2048, 4096])
 param instanceMemoryMB int = 2048
-param appServicePlanSkuName string = 'FC1'
-param appServicePlanTier string = 'FlexConsumption'
 
 param location string = resourceGroup().location
 param commonTags object = {}
-@description('The workspace to store audit logs.')
-param workspaceId string = ''
-@description('Id of the user running this template, to be used for testing and debugging for access to Azure resources. This is not required in production. Leave empty if not needed.')
-//param adminPrincipalId string = ''
 param deploymentSuffix string = ''
 
 // --------------------------------------------------------------------------------
-var templateTag = { TemplateFile: '~functionapp.bicep' }
+var templateTag = { TemplateFile: '~functionflex.bicep' }
 var azdTag = { 'azd-service-name': 'function' }
-var tags = union(commonTags, templateTag)
 var functionTags = union(commonTags, templateTag, azdTag)
+
 var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location))
 var deploymentStorageContainerName = 'app-package-${take(functionAppName, 32)}-${take(resourceToken, 7)}'
 
 // --------------------------------------------------------------------------------
-module applicationInsights 'br/public:avm/res/insights/component:0.6.0' = {
-  name: 'flexappinsights${deploymentSuffix}'
-  params: {
-    name: functionInsightsName
-    location: location
-    tags: tags
-    workspaceResourceId: workspaceId
-    disableLocalAuth: true
-  }
+resource applicationInsightsResource 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: functionInsightsName
+}
+var applicationInsightsConnectionString string = applicationInsightsResource.properties.ConnectionString
+
+resource storageAccountResource 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: functionStorageAccountName
+}
+var storagePrimaryBlobEndpoint string = storageAccountResource.properties.primaryEndpoints.blob
+
+resource appServiceResource 'Microsoft.Web/serverfarms@2023-12-01' existing = {
+  name: functionAppServicePlanName
 }
 
-// Backing storage for Azure Functions
-module storageAccountResource 'br/public:avm/res/storage/storage-account:0.25.0' = {
-  name: 'flexstorage${deploymentSuffix}'
-  params: {
-    name: functionStorageAccountName
-    allowBlobPublicAccess: false
-    allowSharedKeyAccess: false // Disable local authentication methods as per policy
-    dnsEndpointType: 'Standard'
-    publicNetworkAccess: 'Enabled'
-    networkAcls: {
-      defaultAction: 'Allow'
-      bypass: 'AzureServices'
-    }
-    blobServices: {
-      containers: [{name: deploymentStorageContainerName}]
-    }
-    tableServices:{}
-    queueServices: {}
-    minimumTlsVersion: 'TLS1_2'  // Enforcing TLS 1.2 for better security
-    location: location
-    tags: tags
-  }
-}
-
-// Create an App Service Plan to group applications under the same payment plan and SKU
-module appServiceResource 'br/public:avm/res/web/serverfarm:0.1.1' = {
-  name: 'flexappservice${deploymentSuffix}'
-  params: {
-    name: functionAppServicePlanName
-    sku: {
-      name: appServicePlanSkuName
-      tier: appServicePlanTier
-    }
-    reserved: true
-    location: location
-    tags: functionTags
-  }
+var baseAppSettings = {
+    AzureWebJobsStorage__credential: 'managedidentity'
+    AzureWebJobsStorage__blobServiceUri: 'https://${functionStorageAccountName}.blob.${environment().suffixes.storage}'
+    AzureWebJobsStorage__queueServiceUri: 'https://${functionStorageAccountName}.queue.${environment().suffixes.storage}'
+    AzureWebJobsStorage__tableServiceUri: 'https://${functionStorageAccountName}.table.${environment().suffixes.storage}'
+    APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsightsConnectionString
+    APPLICATIONINSIGHTS_AUTHENTICATION_STRING: 'Authorization=AAD'
 }
 
 // --------------------------------------------------------------------------------
-//resource functionAppResource 'Microsoft.Web/sites@2024-11-01' = {
 module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
   name: 'flexapp${deploymentSuffix}'
   params: {
@@ -97,12 +66,12 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
     managedIdentities: {
       systemAssigned: true
     }
-    serverFarmResourceId: appServiceResource.outputs.resourceId
+    serverFarmResourceId: appServiceResource.id
     functionAppConfig: {
       deployment: {
         storage: {
           type: 'blobContainer'
-          value: '${storageAccountResource.outputs.primaryBlobEndpoint}${deploymentStorageContainerName}'
+          value: '${storagePrimaryBlobEndpoint}${deploymentStorageContainerName}'
           authentication: {
             type: 'SystemAssignedIdentity'
           }
@@ -112,7 +81,7 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
         maximumInstanceCount: maximumInstanceCount
         instanceMemoryMB: instanceMemoryMB
       }
-      runtime: { 
+      runtime: {
         name: runtimeName
         version: runtimeVersion
       }
@@ -122,17 +91,7 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
     }
     configs: [{
       name: 'appsettings'
-      properties:{
-        // Only include required credential settings unconditionally
-        AzureWebJobsStorage__credential: 'managedidentity'
-        AzureWebJobsStorage__blobServiceUri: 'https://${storageAccountResource.outputs.name}.blob.${environment().suffixes.storage}'
-        AzureWebJobsStorage__queueServiceUri: 'https://${storageAccountResource.outputs.name}.queue.${environment().suffixes.storage}'
-        AzureWebJobsStorage__tableServiceUri: 'https://${storageAccountResource.outputs.name}.table.${environment().suffixes.storage}'
-
-        // Application Insights settings are always included
-        APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.outputs.connectionString
-        APPLICATIONINSIGHTS_AUTHENTICATION_STRING: 'Authorization=AAD'
-    }
+      properties: union(baseAppSettings, customAppSettings)
     }]
   }
 }
@@ -142,6 +101,6 @@ output id string = functionAppResource.outputs.resourceId
 output hostname string = functionAppResource.outputs.defaultHostname
 output name string = functionAppName
 output insightsName string = functionInsightsName
-output insightsKey string = applicationInsights.outputs.instrumentationKey
+output insightsKey string = applicationInsightsResource.properties.InstrumentationKey
 output storageAccountName string = functionStorageAccountName
 output functionAppPrincipalId string = functionAppResource.outputs.?systemAssignedMIPrincipalId ?? ''

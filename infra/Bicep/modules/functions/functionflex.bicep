@@ -15,6 +15,8 @@ param runtimeVersion string = '10.0'
 param maximumInstanceCount int = 50
 @allowed([512,2048,4096])
 param instanceMemoryMB int = 2048
+param appServicePlanSkuName string = 'FC1'
+param appServicePlanTier string = 'FlexConsumption'
 
 param location string = resourceGroup().location
 param commonTags object = {}
@@ -74,8 +76,8 @@ module appServiceResource 'br/public:avm/res/web/serverfarm:0.1.1' = {
   params: {
     name: functionAppServicePlanName
     sku: {
-      name: 'FC1'
-      tier: 'FlexConsumption'
+      name: appServicePlanSkuName
+      tier: appServicePlanTier
     }
     reserved: true
     location: location

@@ -4,7 +4,7 @@ VisualStudioVersion = 18.3.11312.210
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Processor.Agent.Intake", "Processor.Agent.Intake.csproj", "{EB0D8C57-0429-D71C-840C-C6CB1ACF2B0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Processor.Agent.Data", "..\..\..\..\logicapp.processing.agent-gh-lluppesms\src\data\Processor.Agent.Data.csproj", "{1B67F6D0-D5F5-E38D-01C7-5F83552946FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Processor.Agent.Data", "..\data\Processor.Agent.Data.csproj", "{1B67F6D0-D5F5-E38D-01C7-5F83552946FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

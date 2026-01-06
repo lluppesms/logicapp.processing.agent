@@ -25,7 +25,7 @@ param keyVaultName string = ''
 // param keyVaultResourceGroupName string = resourceGroup().name
 param apimName string = ''
 // param apimResourceGroupName string = resourceGroup().name
-param appInsightsName string
+param appInsightsName string = ''
 // param appInsightsResourceGroupName string = resourceGroup().name
 
 // ----------------------------------------------------------------------------------------------------

@@ -5,7 +5,7 @@ VisualStudioVersion = 18.3.11312.210 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Processor.Agent.Acceptor", "Processor.Agent.Acceptor.csproj", "{DDEACF03-8FDD-52C1-7BFD-BB8E0FCB5F67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Processor.Agent.Data", "..\..\data\Processor.Agent.Data.csproj", "{67C86459-B8E8-D696-28C7-B807AD1420C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Processor.Agent.Data", "..\data\Processor.Agent.Data.csproj", "{67C86459-B8E8-D696-28C7-B807AD1420C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

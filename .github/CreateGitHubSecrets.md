@@ -48,6 +48,19 @@ gh variable set FUNC_TEST_FOLDER_NAME -b src/function/lapagent.Functions.Tests
 gh variable set FUNC_TEST_PROJECT_NAME -b lapagent.Functions.Tests
 ```
 
+Optional Values that can be set:
+
+``` bash
+gh variable set PRINCIPALID -b xxx
+gh variable set MYIPADDRESS -b xxx
+
+gh variable set OPENAI_ENDPOINT -b xxx
+gh variable set OPENAI_APIKEY -b xxx
+
+gh variable set EXISTING_SERVICEPLAN_NAME -b xxx
+gh variable set EXISTING_SERVICEPLAN_RESOURCEGROUP_NAME -b xxx
+```
+
 ---
 
 ## References

@@ -5,7 +5,7 @@ using './main.bicep'
 
 param appName = '#{APP_NAME}#'
 param environmentCode = '#{ENVCODE}#'
-param location = '#{RESOURCEGROUP_LOCATION}#'
+param location = '#{RESOURCE_GROUP_LOCATION}#'
 
 param principalId = '#{PRINCIPALID}#'
 // param myIpAddress = '#{MYIPADDRESS}#'
@@ -18,7 +18,7 @@ param OpenAI_ApiKey = '#{OPENAI_APIKEY}#'
 // param OpenAI_Temperature = '#{OPENAI_TEMPERATURE}#'
 
 param servicePlanName = '#{EXISTING_SERVICEPLAN_NAME}#'
-param servicePlanResourceGroupName = '#{EXISTING_SERVICEPLAN_RESOURCEGROUP_NAME}#'
+param servicePlanResourceGroupName = '#{EXISTING_SERVICEPLAN_RESOURCE_GROUP_NAME}#'
 
 // ----------------------------------------------------------------------------------------------------
 // Experiment: change this to read environment instead of using Quezta replace

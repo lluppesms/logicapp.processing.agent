@@ -33,8 +33,8 @@ Secret Values:
 gh auth login
 
 gh variable set APP_NAME -b XXX-lapagent
-gh variable set RESOURCEGROUP_LOCATION -b eastus
-gh variable set RESOURCEGROUP_PREFIX -b rg_lapagent-web
+gh variable set RESOURCE_GROUP_LOCATION -b eastus
+gh variable set RESOURCE_GROUP_PREFIX -b rg_lapagent-web
 
 gh variable set INTAKE_PROJECT_FOLDER_NAME -b src/intake-function
 gh variable set INTAKE_PROJECT_NAME -b Processor.Agent.Intake
@@ -61,7 +61,7 @@ gh variable set OPENAI_MODELNAME -b gpt_5_mini
 gh variable set OPENAI_TEMPERATURE -b 0.8
 
 gh variable set EXISTING_SERVICEPLAN_NAME -b xxx
-gh variable set EXISTING_SERVICEPLAN_RESOURCEGROUP_NAME -b xxx
+gh variable set EXISTING_SERVICEPLAN_RESOURCE_GROUP_NAME -b xxx
 ```
 
 ---

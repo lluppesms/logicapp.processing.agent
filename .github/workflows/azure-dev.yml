@@ -52,12 +52,12 @@ jobs:
         run: azd provision --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZD_NAME }}
-          RESOURCEGROUP_LOCATION: ${{ vars.RESOURCEGROUP_LOCATION }}
+          RESOURCE_GROUP_LOCATION: ${{ vars.RESOURCE_GROUP_LOCATION }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure Dev Deploy
         run: azd deploy --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZD_NAME }}
-          RESOURCEGROUP_LOCATION: ${{ vars.RESOURCEGROUP_LOCATION }}
+          RESOURCE_GROUP_LOCATION: ${{ vars.RESOURCE_GROUP_LOCATION }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

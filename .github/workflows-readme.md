@@ -59,8 +59,8 @@ These should be set at the repository level and should be the same for all envir
 
 ```bash
 gh variable set APP_NAME -b lll-lapagent
-gh variable set RESOURCEGROUP_LOCATION -b eastus
-gh variable set RESOURCEGROUP_PREFIX -b rg_lapagent-webg 
+gh variable set RESOURCE_GROUP_LOCATION -b eastus
+gh variable set RESOURCE_GROUP_PREFIX -b rg_lapagent-webg 
 
 gh variable set APP_PROJECT_FOLDER_NAME -b src/web/lapagent/lapagent.Web
 gh variable set APP_PROJECT_NAME -b lapagent.Web

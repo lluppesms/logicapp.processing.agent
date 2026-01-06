@@ -13,12 +13,21 @@ param location string = resourceGroup().location
 param servicePlanName string = ''
 param servicePlanResourceGroupName string = '' // if using an existing service plan in a different resource group
 
-param webAppKind string = 'linux' // 'linux' or 'windows'
-param webSiteSku string = 'B1'
+param servicePlanKind string = 'linux' // 'linux' or 'windows'
+param servicePlanSku string = 'B1'
+
+// param functionStorageSku string = 'Standard_LRS'
+// param functionAppSku string = 'B1' //  'Y1'
+// param functionAppSkuFamily string = 'B' // 'Y'
+// param functionAppSkuTier string = 'Dynamic'
+// param environmentSpecificFunctionName string = ''
 
 param OpenAI_Endpoint string
 @secure()
 param OpenAI_ApiKey string
+param OpenAI_DeploymentName string = 'gpt-4o-mini'
+param OpenAI_ModelName string = 'gpt_4o_mini'
+param OpenAI_Temperature string = '0.8'
 
 // --------------------------------------------------------------------------------------------------------------
 // Run Settings Parameters
@@ -179,19 +188,67 @@ module keyVaultSecretOpenAI './modules/security/keyvault-secret.bicep' = {
 }
 
 // --------------------------------------------------------------------------------
-// Service Plan for webapp
+// Service Plan for webapp and function
 // --------------------------------------------------------------------------------
 module appServicePlanModule './modules/webapp/websiteserviceplan.bicep' = {
   name: 'appServicePlan${deploymentSuffix}'
   params: {
     location: location
     commonTags: commonTags
-    sku: webSiteSku
+    sku: servicePlanSku
     environmentCode: environmentCode
     appServicePlanName: servicePlanName == '' ? resourceNames.outputs.webSiteAppServicePlanName : servicePlanName
     existingServicePlanName: servicePlanName
     existingServicePlanResourceGroupName: servicePlanResourceGroupName
-    webAppKind: webAppKind
+    webAppKind: servicePlanKind
+  }
+}
+
+//--------------------------------------------------------------------------------
+module functionFlexModule 'modules/functions/functionflex.bicep' = {
+  name: 'functionFlex${deploymentSuffix}'
+  params: {
+    functionAppName: resourceNames.outputs.functionFlexAppName
+    functionAppServicePlanName: resourceNames.outputs.functionFlexAppServicePlanName
+    functionInsightsName: resourceNames.outputs.functionFlexInsightsName
+    functionStorageAccountName: resourceNames.outputs.functionFlexStorageName
+    location: location
+    commonTags: commonTags
+    workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId
+    deploymentSuffix: deploymentSuffix
+  }
+}
+
+module functionFlexRoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
+  name: 'identity-roles${deploymentSuffix}'
+  params: {
+    identityPrincipalId: functionFlexModule.outputs.functionAppPrincipalId
+    principalType: 'ServicePrincipal'
+    appInsightsName: functionFlexModule.outputs.insightsName
+    storageAccountName: functionFlexModule.outputs.storageAccountName
+  }
+}
+
+module functionAppSettingsModule 'modules/functions/functionappsettings.bicep' = {
+  name: 'functionAppSettings${deploymentSuffix}'
+  params: {
+    functionAppName: functionFlexModule.outputs.name
+    functionStorageAccountName: functionFlexModule.outputs.storageAccountName
+    functionInsightsKey: functionFlexModule.outputs.insightsKey
+    //keyVaultName: keyVaultModule.outputs.name
+    customAppSettings: {
+      CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
+      CosmosDb__ConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__DatabaseName: cosmosDatabaseName 
+      CosmosDb__ContainerNames__Requests: processRequestsContainerName
+      CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
+      // OpenAI settings (now configured directly in web app)
+      OpenAI__Models__gpt_4o_mini__DeploymentName: OpenAI_DeploymentName
+      OpenAI__Models__gpt_4o_mini__Endpoint: OpenAI_Endpoint
+      OpenAI__Models__gpt_4o_mini__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
+      OpenAI__DefaultModel: OpenAI_ModelName
+      OpenAI__Temperature: OpenAI_Temperature
+    }
   }
 }
 
@@ -203,7 +260,7 @@ module webSiteModule './modules/webapp/website.bicep' = {
     location: location
     commonTags: commonTags
     environmentCode: environmentCode
-    webAppKind: webAppKind
+    webAppKind: servicePlanKind
     managedIdentityId: identity.outputs.managedIdentityId
     managedIdentityPrincipalId: identity.outputs.managedIdentityPrincipalId
     workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId
@@ -233,11 +290,11 @@ module webSiteAppSettingsModule './modules/webapp/websiteappsettings.bicep' = {
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
       // OpenAI settings (now configured directly in web app)
-      OpenAI__Models__gpt_4o_mini__DeploymentName: 'gpt-4o-mini'
+      OpenAI__Models__gpt_4o_mini__DeploymentName: OpenAI_DeploymentName
       OpenAI__Models__gpt_4o_mini__Endpoint: OpenAI_Endpoint
       OpenAI__Models__gpt_4o_mini__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
-      OpenAI__DefaultModel: 'gpt_4o_mini'
-      OpenAI__Temperature: '0.8'
+      OpenAI__DefaultModel: OpenAI_ModelName
+      OpenAI__Temperature: OpenAI_Temperature
     }
   }
 }

@@ -2,7 +2,7 @@
 // This BICEP file will create an .NET 10 Isolated Azure Function
 // See: https://github.com/Azure-Samples/azure-functions-flex-consumption-samples/blob/main/IaC/bicep/main.bicep
 // ----------------------------------------------------------------------------------------------------
-param functionAppName string = 'll-flex-test-2'
+param functionAppName string
 param functionAppServicePlanName string
 param functionInsightsName string
 param functionStorageAccountName string
@@ -21,7 +21,7 @@ param commonTags object = {}
 @description('The workspace to store audit logs.')
 param workspaceId string = ''
 @description('Id of the user running this template, to be used for testing and debugging for access to Azure resources. This is not required in production. Leave empty if not needed.')
-param adminPrincipalId string = ''
+//param adminPrincipalId string = ''
 param deploymentSuffix string = ''
 
 // --------------------------------------------------------------------------------
@@ -132,18 +132,6 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
         APPLICATIONINSIGHTS_AUTHENTICATION_STRING: 'Authorization=AAD'
     }
     }]
-  }
-}
-
-// Consolidated Role Assignments
-module rbacAssignments './functionflexrbac.bicep' = {
-  name: 'flexrbac${deploymentSuffix}'
-  params: {
-    storageAccountName: storageAccountResource.outputs.name
-    appInsightsName: applicationInsights.outputs.name
-    managedIdentityPrincipalId: functionAppResource.outputs.?systemAssignedMIPrincipalId ?? ''
-    //userIdentityPrincipalId: adminPrincipalId
-    //allowUserIdentityPrincipal: !empty(adminPrincipalId)
   }
 }
 

@@ -227,6 +227,7 @@ module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
     functionAppServicePlanName: functionFlexServicePlanModule.outputs.appServicePlanName
     functionInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
     functionStorageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    deploymentStorageContainerName: functionFlexServicePlanModule.outputs.deploymentStorageContainerName
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix

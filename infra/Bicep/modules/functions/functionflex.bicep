@@ -6,6 +6,7 @@ param functionAppName string
 param functionAppServicePlanName string
 param functionInsightsName string
 param functionStorageAccountName string
+param deploymentStorageContainerName string = ''
 
 param customAppSettings object = {}
 
@@ -29,7 +30,8 @@ var azdTag = { 'azd-service-name': 'function' }
 var functionTags = union(commonTags, templateTag, azdTag)
 
 var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location))
-var deploymentStorageContainerName = 'app-package-${take(functionAppName, 32)}-${take(resourceToken, 7)}'
+// Use provided container name from service plan module, or calculate a default
+var actualDeploymentContainerName = !empty(deploymentStorageContainerName) ? deploymentStorageContainerName : 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
 
 // --------------------------------------------------------------------------------
 resource applicationInsightsResource 'Microsoft.Insights/components@2020-02-02' existing = {
@@ -47,6 +49,7 @@ resource appServiceResource 'Microsoft.Web/serverfarms@2023-12-01' existing = {
 }
 
 var baseAppSettings = {
+    AzureWebJobsStorage__accountName: functionStorageAccountName
     AzureWebJobsStorage__credential: 'managedidentity'
     AzureWebJobsStorage__blobServiceUri: 'https://${functionStorageAccountName}.blob.${environment().suffixes.storage}'
     AzureWebJobsStorage__queueServiceUri: 'https://${functionStorageAccountName}.queue.${environment().suffixes.storage}'
@@ -71,7 +74,7 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
       deployment: {
         storage: {
           type: 'blobContainer'
-          value: '${storagePrimaryBlobEndpoint}${deploymentStorageContainerName}'
+          value: '${storagePrimaryBlobEndpoint}${actualDeploymentContainerName}'
           authentication: {
             type: 'SystemAssignedIdentity'
           }

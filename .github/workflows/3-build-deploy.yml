@@ -17,17 +17,13 @@ on:
         description: Run Security Scan
         default: false
         type: boolean
-      runBuildDeployWeb:
-        description: Build and Deploy WebApp
+      runBuildDeployLogicApp:
+        description: Build and Deploy Logic App
         default: true
         type: boolean
-      # runBuildDeployFunction:
-      #   description: Build and Deploy Function
-      #   default: true
-      #   type: boolean
-      runSmokeTest:
-        description: Run Smoke Tests
-        default: false
+      runBuildDeployFunction:
+        description: Build and Deploy Function
+        default: true
         type: boolean
       logLevel:
         description: Log level
@@ -63,10 +59,10 @@ jobs:
       runGHASScan: ${{ inputs.runSecurityScan }}
 
 # ------------------------------------------------------------------------------------------------------------------------
-  build-webapp:
-    name: Build WebApp
+  build-logicapp:
+    name: Build Logic App
     uses: ./.github/workflows/template-webapp-build.yml
-    if: inputs.runBuildDeployWeb || inputs.runSmokeTest
+    if: inputs.runBuildDeployLogicApp
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
@@ -77,50 +73,38 @@ jobs:
       testApplication: true
       listFilesAfterBuild: true
 
-  # build-func:
-  #   name: Build Function
-  #   if: inputs.runBuildDeployFunction
-  #   uses: ./.github/workflows/template-function-app-build.yml
-  #   secrets: inherit
-  #   with:
-  #     envCode: ${{ inputs.deployEnvironment }}
-  #     rootDirectory: '${{ vars.FUNC_PROJECT_FOLDER_NAME }}'
-  #     projectName: '${{ vars.FUNC_PROJECT_NAME }}'
-  #     testDirectory: '${{ vars.FUNC_TEST_FOLDER_NAME }}'
-  #     testProjectName: '${{ vars.FUNC_TEST_PROJECT_NAME }}'
-  #     testApplication: true
-  #     listFilesAfterBuild: true
+  build-func:
+    name: Build Function
+    if: inputs.runBuildDeployFunction
+    uses: ./.github/workflows/template-function-app-build.yml
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
+      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
+      testApplication: true
+      listFilesAfterBuild: true
 
 # ------------------------------------------------------------------------------------------------------------------------
-  deploy-webapp:
-    name: Deploy WebApp ${{ inputs.deployEnvironment }}
+  deploy-logicapp:
+    name: Deploy LogicApp ${{ inputs.deployEnvironment }}
     uses: ./.github/workflows/template-webapp-deploy.yml
-    if: inputs.runBuildDeployWeb || inputs.runSmokeTest
-    needs: [ build-webapp ]
+    if: inputs.runBuildDeployLogicApp
+    needs: [ build-logicapp ]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
       listFilesBeforeDeploy: true
 
-  # deploy-func:
-  #   name: Deploy Function
-  #   # the login seems to crash if you try to deploy both web and function at the same time...???
-  #   needs: [ build-func, deploy-webapp ]
-  #   uses: ./.github/workflows/template-function-app-deploy.yml
-  #   if: inputs.runBuildDeployFunction
-  #   secrets: inherit
-  #   with:
-  #     envCode: ${{ inputs.deployEnvironment }}
-  #     listFilesBeforeDeploy: true
-     
-# ------------------------------------------------------------------------------------------------------------------------
-  run-smoke-test:
-    name: Smoke Test ${{ inputs.deployEnvironment }}
-    uses: ./.github/workflows/template-smoke-test.yml
-    if: inputs.runSmokeTest
-    needs: deploy-webapp
+  deploy-func:
+    name: Deploy Function
+    # the login seems to crash if you try to deploy both web and function at the same time...???
+    needs: [ build-func ]
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    if: inputs.runBuildDeployFunction
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      testPath: 'Tests/playwright/ui-tests'
-      testType: 'ui'
+      listFilesBeforeDeploy: true

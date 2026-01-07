@@ -233,18 +233,18 @@ module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
     deploymentSuffix: deploymentSuffix
     customAppSettings: {
       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
-      CosmosDb__ConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__ConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       CosmosDb__DatabaseName: cosmosDatabaseName
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
       // Settings for Function with Cosmos trigger -- no sub levels
       CosmosDbDatabaseName: cosmosDatabaseName
       CosmosDbContainerName: processRequestsContainerName
-      CosmosDbConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDbConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       // OpenAI settings
       OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
       OpenAI__Chat__Endpoint: OpenAI_Endpoint
-      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
+      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretOpenAI.outputs.secretName})'
       OpenAI__Chat__ModelName: OpenAI_ModelName
       OpenAI__Chat__Temperature: OpenAI_Temperature
     }

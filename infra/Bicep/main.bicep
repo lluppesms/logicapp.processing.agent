@@ -259,6 +259,7 @@ module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = 
     principalType: 'ServicePrincipal'
     appInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
     storageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    keyVaultName: keyVaultModule.outputs.name
   }
 }
 

@@ -12,6 +12,9 @@ on:
       envCode:
         required: true
         type: string
+      functionType:
+        type: string
+        default: 'func'
       listFilesBeforeDeploy:
         required: false
         type: boolean
@@ -28,8 +31,8 @@ jobs:
 
     env:
       artifactName: functionapp
-      generatedAppEnvName: ${{ vars.ACCEPTOR_NAME }}-func-${{ inputs.envCode }}
-      #Bicep: var functionAppName = environmentSpecificFunctionName == '' ? environmentCode == 'azd' ? '${lowerAppName}function' : toLower('${lowerAppName}-func-${sanitizedEnvironment}') : environmentSpecificFunctionName
+      generatedAppEnvName: ${{ vars.APP_NAME }}-${{ inputs.functionType }}-${{ inputs.envCode }}
+      #Bicep: var functionAppName = toLower('${lowerAppName}-func-${sanitizedEnvironment}')
 
     steps:
     - name: Download build artifacts

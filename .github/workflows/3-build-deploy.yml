@@ -107,4 +107,5 @@ jobs:
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
+      functionType: 'flex'
       listFilesBeforeDeploy: true

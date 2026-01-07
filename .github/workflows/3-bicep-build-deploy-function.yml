@@ -101,10 +101,10 @@ jobs:
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.INTAKE_APP_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.INTAKE_APP_PROJECT_NAME }}'
-      testDirectory: '${{ vars.INTAKE_APP_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.INTAKE_APP_TEST_PROJECT_NAME }}'
+      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
+      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
       testApplication: true
       listFilesAfterBuild: true
 
@@ -130,6 +130,7 @@ jobs:
     with:
       envCode: ${{ inputs.deployEnvironment }}
       functionType: 'flex'
+      listFilesBeforeDeploy: true
 
 # ------------------------------------------------------------------------------------------------------------------------
   run-smoke-test:

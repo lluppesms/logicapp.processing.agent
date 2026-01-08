@@ -45,5 +45,5 @@ jobs:
     uses: ./.github/workflows/template-scan-code.yml
     secrets: inherit
     with:
-      runMSDevSecOpsScan: ${{ inputs.runMSDevSecOpsScan || true }}
-      runGHASScan: ${{ inputs.runGHASScan || true }}
+      runMSDevSecOpsScan: ${{ inputs.runMSDevSecOpsScan }}
+      runGHASScan: ${{ inputs.runGHASScan }}

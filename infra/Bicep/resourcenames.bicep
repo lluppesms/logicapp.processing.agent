@@ -35,6 +35,9 @@ output functionFlexAppName string        = functionFlexAppName
 output functionFlexAppServicePlanName string = '${functionFlexAppName}-${resourceAbbreviations.webSitesAppService}'
 output functionFlexInsightsName string   = '${functionFlexAppName}-${resourceAbbreviations.insightsComponents}'
 
+var acceptorFunctionAppName = toLower('${sanitizedAppNameWithDashes}-acceptor-${sanitizedEnvironment}')
+output acceptorFunctionAppName string    = acceptorFunctionAppName
+
 output logAnalyticsWorkspaceName string  = toLower('${sanitizedAppNameWithDashes}-${sanitizedEnvironment}-${resourceAbbreviations.operationalInsightsWorkspaces}')
 output cosmosDatabaseName string         = toLower('${sanitizedAppName}-${resourceAbbreviations.documentDBDatabaseAccounts}-${sanitizedEnvironment}')
 

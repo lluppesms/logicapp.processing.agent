@@ -263,6 +263,47 @@ module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = 
   }
 }
 
+// --------------------------------------------------------------------------------
+// Function App 2 - Acceptor Function (Cosmos DB triggered intake processor)
+// --------------------------------------------------------------------------------
+module acceptorFunctionAppModule 'modules/functions/functionflex.bicep' = {
+  name: 'acceptorFunctionApp${deploymentSuffix}'
+  params: {
+    functionAppName: resourceNames.outputs.acceptorFunctionAppName
+    functionAppServicePlanName: functionFlexServicePlanModule.outputs.appServicePlanName
+    functionInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
+    functionStorageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    deploymentStorageContainerName: functionFlexServicePlanModule.outputs.deploymentStorageContainerName
+    location: location
+    commonTags: commonTags
+    deploymentSuffix: deploymentSuffix
+    customAppSettings: {
+      CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
+      CosmosDb__ConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__DatabaseName: cosmosDatabaseName
+      CosmosDb__ContainerNames__Requests: processRequestsContainerName
+      CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
+      // Settings for Function with Cosmos trigger -- no sub levels
+      CosmosDbDatabaseName: cosmosDatabaseName
+      CosmosDbContainerName: processRequestsContainerName
+      CosmosDbConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+    }
+  }
+}
+
+// Role assignments for Acceptor Function App
+module acceptorFunctionAppRoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
+  name: 'acceptorFunctionApp-roles${deploymentSuffix}'
+  params: {
+    identityPrincipalId: acceptorFunctionAppModule.outputs.functionAppPrincipalId
+    principalType: 'ServicePrincipal'
+    appInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
+    storageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    keyVaultName: keyVaultModule.outputs.name
+    cosmosName: cosmosModule.outputs.name
+  }
+}
+
 // // --------------------------------------------------------------------------------
 // module webSiteModule './modules/webapp/website.bicep' = {
 //   name: 'webSite${deploymentSuffix}'
@@ -318,4 +359,5 @@ module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = 
 output SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP_NAME string = resourceGroupName
 output FUNCTION1_HOST_NAME string = functionFlexApp1Module.outputs.hostname
+output ACCEPTOR_FUNCTION_HOST_NAME string = acceptorFunctionAppModule.outputs.hostname
 //output WEB_HOST_NAME string = webSiteModule.outputs.hostName

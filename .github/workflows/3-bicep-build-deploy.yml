@@ -3,8 +3,8 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # FYI: You need to set up some secrets before running this workflows - see CreateGitHubSecrets.md for details.
 # ------------------------------------------------------------------------------------------------------------------------
-name: 3.bicep.build.deploy.function
-run-name: '3 - Deploy Bicep/Build & Deploy Function: ${{ inputs.bicepDeploymentMode }} using ENV ${{ inputs.deployEnvironment }} by @${{ github.actor }}'
+name: 3.bicep.build.deploy
+run-name: '3 - Bicep/Build/Deploy Apps using ENV ${{ inputs.deployEnvironment }} by @${{ github.actor }}'
 on: 
   workflow_dispatch:
     inputs:
@@ -20,38 +20,34 @@ on:
         description: Deploy Bicep
         default: true
         type: boolean
-      bicepDeploymentMode:
-        description: Bicep Mode
-        default: create
+      logicAppAction:
+        description: Logic App
+        default: ignore 
         type: choice
         options:
-          - create
-          - whatIf
-      runBuild:
-        description: Build Function App
-        default: true
-        type: boolean
-      runDeploy:
-        description: Deploy Function App
-        default: true
-        type: boolean
+          - ignore
+          - build
+          - deploy 
+      functionAppAction:
+        description: Function
+        default: ignore 
+        type: choice
+        options:
+          - ignore
+          - build
+          - deploy
       runSecurityScan:
         description: Run Security Scan
+        default: false
+        type: boolean
+      runDeployCosmos:
+        description: Update Cosmos DB
         default: false
         type: boolean
       runSmokeTest:
         description: Run Smoke Tests
         default: false
         type: boolean
-      logLevel:
-        description: Log level
-        required: false
-        default: 'warning' 
-        type: choice
-        options:
-          - info
-          - warning
-          - debug 
 
 # ------------------------------------------------------------------------------------------------------------------------
 permissions:
@@ -90,13 +86,13 @@ jobs:
       parameterFileReplaceTokens: 'true'
       requestorName: ${{ github.actor }}
       createResourceGroup: ${{ inputs.createResourceGroup }}
-      bicepDeploymentMode: ${{ inputs.bicepDeploymentMode }}
+      deployCosmos: ${{ inputs.runDeployCosmos }}
 
 # ------------------------------------------------------------------------------------------------------------------------
   build-function:
     name: Build Function App
     uses: ./.github/workflows/template-function-app-build.yml
-    if: inputs.runBuild || inputs.runDeploy
+    if: inputs.functionAppAction != 'ignore'  
     needs: create-infra
     secrets: inherit
     with:
@@ -110,27 +106,40 @@ jobs:
 
 # ------------------------------------------------------------------------------------------------------------------------
   deploy-function:
-    name: Deploy Function App
+    name: Deploy Function
     uses: ./.github/workflows/template-function-app-deploy.yml
-    if: inputs.runDeploy
-    needs: build-function
-    secrets: inherit
-    with:
-      envCode: ${{ inputs.deployEnvironment }}
-      functionType: 'func'
-
-      
-# ------------------------------------------------------------------------------------------------------------------------
-  deploy-flex:
-    name: Deploy Flex Function
-    uses: ./.github/workflows/template-function-app-deploy.yml
-    if: inputs.runDeploy
+    if: inputs.functionAppAction == 'deploy'
     needs: build-function
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
       functionType: 'flex'
       listFilesBeforeDeploy: true
+
+# ------------------------------------------------------------------------------------------------------------------------
+  build-logicapp:
+    name: Build Logic App
+    uses: ./.github/workflows/template-webapp-build.yml
+    if: inputs.logicAppAction != 'ignore'
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
+      testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
+      testApplication: true
+      listFilesAfterBuild: true
+
+# ------------------------------------------------------------------------------------------------------------------------
+  deploy-logicapp:
+    name: Deploy LogicApp ${{ inputs.deployEnvironment }}
+    uses: ./.github/workflows/template-webapp-deploy.yml
+    if: inputs.logicAppAction == 'deploy'
+    needs: build-logicapp
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
 
 # ------------------------------------------------------------------------------------------------------------------------
   run-smoke-test:

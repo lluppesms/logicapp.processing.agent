@@ -3,8 +3,8 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # FYI: You need to set up some secrets before running this workflows - see CreateGitHubSecrets.md for details.
 # ------------------------------------------------------------------------------------------------------------------------
-name: 3.build.deploy
-run-name: '3 - [${{ inputs.deployEnvironment }}] Build/Deploy by @${{ github.actor }}'
+name: 2.build.deploy
+run-name: '2 - Build/Deploy Apps using ENV ${{ inputs.deployEnvironment }} by @${{ github.actor }}'
 
 on: 
   workflow_dispatch:
@@ -17,23 +17,22 @@ on:
         description: Run Security Scan
         default: false
         type: boolean
-      runBuildDeployLogicApp:
-        description: Build and Deploy Logic App
-        default: true
-        type: boolean
-      runBuildDeployFunction:
-        description: Build and Deploy Function
-        default: true
-        type: boolean
-      logLevel:
-        description: Log level
-        required: false
-        default: 'warning' 
+      logicAppAction:
+        description: Logic App
+        default: ignore 
         type: choice
         options:
-          - info
-          - warning
-          - debug 
+          - ignore
+          - build
+          - deploy 
+      functionAppAction:
+        description: Function
+        default: ignore 
+        type: choice
+        options:
+          - ignore
+          - build
+          - deploy
 
 # ------------------------------------------------------------------------------------------------------------------------
 permissions:
@@ -62,7 +61,7 @@ jobs:
   build-logicapp:
     name: Build Logic App
     uses: ./.github/workflows/template-webapp-build.yml
-    if: inputs.runBuildDeployLogicApp
+    if: inputs.logicAppAction != 'ignore'
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
@@ -75,7 +74,7 @@ jobs:
 
   build-func:
     name: Build Function
-    if: inputs.runBuildDeployFunction
+    if: inputs.functionAppAction != 'ignore'
     uses: ./.github/workflows/template-function-app-build.yml
     secrets: inherit
     with:
@@ -91,7 +90,7 @@ jobs:
   deploy-logicapp:
     name: Deploy LogicApp ${{ inputs.deployEnvironment }}
     uses: ./.github/workflows/template-webapp-deploy.yml
-    if: inputs.runBuildDeployLogicApp
+    if: inputs.logicAppAction == 'deploy'
     needs: [ build-logicapp ]
     secrets: inherit
     with:
@@ -103,8 +102,7 @@ jobs:
     # the login seems to crash if you try to deploy both web and function at the same time...???
     needs: [ build-func ]
     uses: ./.github/workflows/template-function-app-deploy.yml
-    if: inputs.runBuildDeployFunction
-    secrets: inherit
+    if: inputs.functionAppAction == 'deploy'
     with:
       envCode: ${{ inputs.deployEnvironment }}
       functionType: 'flex'

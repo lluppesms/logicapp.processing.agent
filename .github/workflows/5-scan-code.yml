@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # GHA Workflow to Scan Bicep on a schedule
 # ------------------------------------------------------------------------------------------------------------------------
-name: 6.scan.code.scheduled
-run-name: '6 - Scheduled Scan Code'
+name: 5.scan.code.scheduled
+run-name: '5 - Scheduled Scan Code'
 
 on:
   workflow_dispatch:

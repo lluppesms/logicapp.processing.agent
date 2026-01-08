@@ -13,9 +13,6 @@ on:
         description: Environment
         default: 'dev' 
         type: environment
-      runSecurityScan:
-        description: Run Security Scan
-        default: false
         type: boolean
       logicAppAction:
         description: Logic App
@@ -33,6 +30,9 @@ on:
           - ignore
           - build
           - deploy
+      runSecurityScan:
+        description: Run Security Scan
+        default: false
 
 # ------------------------------------------------------------------------------------------------------------------------
 permissions:
@@ -58,6 +58,33 @@ jobs:
       runGHASScan: ${{ inputs.runSecurityScan }}
 
 # ------------------------------------------------------------------------------------------------------------------------
+  build-function:
+    name: Build Function App
+    uses: ./.github/workflows/template-function-app-build.yml
+    if: inputs.functionAppAction != 'ignore'
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
+      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
+      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
+      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
+      testApplication: true
+      listFilesAfterBuild: true
+
+  deploy-function:
+    name: Deploy Function
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    if: inputs.functionAppAction == 'deploy'
+    # the login seems to crash if you try to deploy both web and function at the same time...???
+    needs: build-function
+    secrets: inherit
+    with:
+      envCode: ${{ inputs.deployEnvironment }}
+      functionType: 'flex'
+      listFilesBeforeDeploy: true
+
+# ------------------------------------------------------------------------------------------------------------------------
   build-logicapp:
     name: Build Logic App
     uses: ./.github/workflows/template-webapp-build.yml
@@ -72,38 +99,13 @@ jobs:
       testApplication: true
       listFilesAfterBuild: true
 
-  build-func:
-    name: Build Function
-    if: inputs.functionAppAction != 'ignore'
-    uses: ./.github/workflows/template-function-app-build.yml
-    secrets: inherit
-    with:
-      envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
-      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
-      testApplication: true
-      listFilesAfterBuild: true
-
-# ------------------------------------------------------------------------------------------------------------------------
   deploy-logicapp:
     name: Deploy LogicApp ${{ inputs.deployEnvironment }}
     uses: ./.github/workflows/template-webapp-deploy.yml
     if: inputs.logicAppAction == 'deploy'
-    needs: [ build-logicapp ]
+    needs: build-logicapp
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
       listFilesBeforeDeploy: true
 
-  deploy-func:
-    name: Deploy Function
-    # the login seems to crash if you try to deploy both web and function at the same time...???
-    needs: [ build-func ]
-    uses: ./.github/workflows/template-function-app-deploy.yml
-    if: inputs.functionAppAction == 'deploy'
-    with:
-      envCode: ${{ inputs.deployEnvironment }}
-      functionType: 'flex'
-      listFilesBeforeDeploy: true

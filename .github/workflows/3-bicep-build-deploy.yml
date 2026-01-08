@@ -92,7 +92,7 @@ jobs:
   build-function:
     name: Build Function App
     uses: ./.github/workflows/template-function-app-build.yml
-    if: inputs.functionAppAction != 'ignore'  
+    if: inputs.functionAppAction != 'ignore'
     needs: create-infra
     secrets: inherit
     with:
@@ -104,11 +104,11 @@ jobs:
       testApplication: true
       listFilesAfterBuild: true
 
-# ------------------------------------------------------------------------------------------------------------------------
   deploy-function:
     name: Deploy Function
     uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.functionAppAction == 'deploy'
+    # the login seems to crash if you try to deploy both web and function at the same time...???
     needs: build-function
     secrets: inherit
     with:
@@ -131,7 +131,6 @@ jobs:
       testApplication: true
       listFilesAfterBuild: true
 
-# ------------------------------------------------------------------------------------------------------------------------
   deploy-logicapp:
     name: Deploy LogicApp ${{ inputs.deployEnvironment }}
     uses: ./.github/workflows/template-webapp-deploy.yml
@@ -140,6 +139,7 @@ jobs:
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
+      listFilesBeforeDeploy: true
 
 # ------------------------------------------------------------------------------------------------------------------------
   run-smoke-test:

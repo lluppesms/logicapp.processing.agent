@@ -30,7 +30,7 @@ on:
           - deploy 
       functionAppAction:
         description: Function
-        default: ignore 
+        default: deploy 
         type: choice
         options:
           - ignore

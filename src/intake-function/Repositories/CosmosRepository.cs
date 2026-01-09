@@ -39,7 +39,7 @@ public class CosmosRepository : ICosmosRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating request in Cosmos DB");
+            _logger.LogError(ex, $"Error creating request in Cosmos DB: {ex.Message}");
             throw;
         }
     }
@@ -64,7 +64,7 @@ public class CosmosRepository : ICosmosRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving process types from Cosmos DB");
+            _logger.LogError(ex, $"Error retrieving process types from Cosmos DB: {ex.Message}");
             throw;
         }
     }

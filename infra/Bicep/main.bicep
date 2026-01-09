@@ -66,6 +66,8 @@ module resourceNames 'resourcenames.bicep' = {
     appName: appName
     environmentCode: environmentCode
     // environmentSpecificFunctionName: ''
+    functionAppName1: 'intake'
+    functionAppName2: 'acceptor'
   }
 }
 // --------------------------------------------------------------------------------
@@ -204,12 +206,12 @@ module keyVaultSecretOpenAI './modules/security/keyvault-secret.bicep' = {
 // Function Flex Consumption - Shared Infrastructure (App Service Plan, App Insights, Storage)
 // This is deployed once and shared by all function apps
 // --------------------------------------------------------------------------------
-module functionFlexServicePlanModule 'modules/functions/functionserviceplan.bicep' = {
-  name: 'functionFlexServicePlan${deploymentSuffix}'
+module flexFunctionServicePlanModule 'modules/functions/functionserviceplan.bicep' = {
+  name: 'flexFunctionServicePlan${deploymentSuffix}'
   params: {
-    functionAppServicePlanName: resourceNames.outputs.functionFlexAppServicePlanName
-    functionInsightsName: resourceNames.outputs.functionFlexInsightsName
-    functionStorageAccountName: resourceNames.outputs.functionFlexStorageName
+    functionAppServicePlanName: resourceNames.outputs.functionApp1ServicePlanName
+    functionInsightsName: resourceNames.outputs.functionApp1InsightsName
+    functionStorageAccountName: resourceNames.outputs.functionApp1StorageName
     location: location
     commonTags: commonTags
     workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId
@@ -221,13 +223,13 @@ module functionFlexServicePlanModule 'modules/functions/functionserviceplan.bice
 // Function App 1 - Main Processing Function
 // --------------------------------------------------------------------------------
 module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
-  name: 'functionFlexApp1${deploymentSuffix}'
+  name: 'intakeFunctionApp${deploymentSuffix}'
   params: {
-    functionAppName: resourceNames.outputs.functionFlexAppName
-    functionAppServicePlanName: functionFlexServicePlanModule.outputs.appServicePlanName
-    functionInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
-    functionStorageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
-    deploymentStorageContainerName: functionFlexServicePlanModule.outputs.deploymentStorageContainerName
+    functionAppName: resourceNames.outputs.functionApp1Name
+    functionAppServicePlanName: flexFunctionServicePlanModule.outputs.appServicePlanName
+    functionInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
+    functionStorageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
+    deploymentStorageContainerName: flexFunctionServicePlanModule.outputs.deploymentStorageContainerName
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix
@@ -253,12 +255,12 @@ module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
 
 // Role assignments for Function App 1
 module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
-  name: 'functionFlexApp1-roles${deploymentSuffix}'
+  name: 'intakeFunctionApp-roles${deploymentSuffix}'
   params: {
     identityPrincipalId: functionFlexApp1Module.outputs.functionAppPrincipalId
     principalType: 'ServicePrincipal'
-    appInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
-    storageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    appInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
+    storageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
     keyVaultName: keyVaultModule.outputs.name
   }
 }
@@ -269,11 +271,11 @@ module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = 
 module acceptorFunctionAppModule 'modules/functions/functionflex.bicep' = {
   name: 'acceptorFunctionApp${deploymentSuffix}'
   params: {
-    functionAppName: resourceNames.outputs.acceptorFunctionAppName
-    functionAppServicePlanName: functionFlexServicePlanModule.outputs.appServicePlanName
-    functionInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
-    functionStorageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
-    deploymentStorageContainerName: functionFlexServicePlanModule.outputs.deploymentStorageContainerName
+    functionAppName: resourceNames.outputs.functionApp2Name
+    functionAppServicePlanName: flexFunctionServicePlanModule.outputs.appServicePlanName
+    functionInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
+    functionStorageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
+    deploymentStorageContainerName: flexFunctionServicePlanModule.outputs.deploymentStorageContainerName
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix
@@ -287,6 +289,12 @@ module acceptorFunctionAppModule 'modules/functions/functionflex.bicep' = {
       CosmosDbDatabaseName: cosmosDatabaseName
       CosmosDbContainerName: processRequestsContainerName
       CosmosDbConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      // OpenAI settings
+      OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
+      OpenAI__Chat__Endpoint: OpenAI_Endpoint
+      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretOpenAI.outputs.secretName})'
+      OpenAI__Chat__ModelName: OpenAI_ModelName
+      OpenAI__Chat__Temperature: OpenAI_Temperature
     }
   }
 }
@@ -297,8 +305,8 @@ module acceptorFunctionAppRoleAssignments './modules/iam/role-assignments.bicep'
   params: {
     identityPrincipalId: acceptorFunctionAppModule.outputs.functionAppPrincipalId
     principalType: 'ServicePrincipal'
-    appInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
-    storageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    appInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
+    storageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
     keyVaultName: keyVaultModule.outputs.name
     cosmosName: cosmosModule.outputs.name
   }

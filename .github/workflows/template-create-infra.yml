@@ -71,8 +71,8 @@ jobs:
     # ------------------------------------------------------------------------------------------------------------------------
     env:
       envCode: ${{ inputs.envCode }}
-      generatedAppEnvName: ${{ inputs.envCode == 'prod' && vars.ACCEPTOR_NAME || format('{0}-{1}', vars.ACCEPTOR_NAME, inputs.envCode) }}
-      generatedResourceGroupName: ${{ vars.RESOURCE_GROUP_NAME || format('{0}-{1}', vars.RESOURCE_GROUP_PREFIX, inputs.envCode) }}
+      generatedAppEnvName: ${{ inputs.envCode == 'prod' && vars.ACCEPTOR_NAME || format('{0}-{1}-{2}', vars.ACCEPTOR_NAME, inputs.envCode) }}-${{ vars.INSTANCE_NUMBER }}
+      generatedResourceGroupName: ${{ vars.RESOURCE_GROUP_NAME || format('{0}-{1}-{2}', vars.RESOURCE_GROUP_PREFIX, inputs.envCode, vars.INSTANCE_NUMBER) }}
       createResourceGroup: ${{ inputs.createResourceGroup }}
       requestorName: ${{ inputs.requestorName }}
       deployCosmos: ${{ inputs.deployCosmos }}

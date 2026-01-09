@@ -10,6 +10,7 @@
 param appName string = ''
 param environmentCode string = 'azd'
 param location string = resourceGroup().location
+param instanceNumber string = '1'
 // param servicePlanName string = ''
 // param servicePlanResourceGroupName string = '' // if using an existing service plan in a different resource group
 // param servicePlanKind string = 'linux' // 'linux' or 'windows'
@@ -65,9 +66,12 @@ module resourceNames 'resourcenames.bicep' = {
   params: {
     appName: appName
     environmentCode: environmentCode
-    // environmentSpecificFunctionName: ''
+    instanceNumber: instanceNumber
     functionAppName1: 'intake'
-    functionAppName2: 'acceptor'
+    functionAppName2: 'accept'
+    functionAppName3: 'process'
+    functionAppName4: 'receive'
+    functionAppName5: 'analyze'
   }
 }
 // --------------------------------------------------------------------------------
@@ -209,9 +213,9 @@ module keyVaultSecretOpenAI './modules/security/keyvault-secret.bicep' = {
 module flexFunctionServicePlanModule 'modules/functions/functionserviceplan.bicep' = {
   name: 'flexFunctionServicePlan${deploymentSuffix}'
   params: {
-    functionAppServicePlanName: resourceNames.outputs.functionApp1ServicePlanName
-    functionInsightsName: resourceNames.outputs.functionApp1InsightsName
-    functionStorageAccountName: resourceNames.outputs.functionApp1StorageName
+    functionAppServicePlanName: resourceNames.outputs.appServicePlanName
+    functionInsightsName: resourceNames.outputs.appInsightsName
+    functionStorageAccountName: resourceNames.outputs.storageAccountName
     location: location
     commonTags: commonTags
     workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId

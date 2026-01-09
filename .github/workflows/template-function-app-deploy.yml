@@ -31,7 +31,7 @@ jobs:
 
     env:
       artifactName: functionapp
-      generatedAppEnvName: ${{ vars.APP_NAME }}-${{ inputs.functionType }}-${{ inputs.envCode }}
+      generatedAppEnvName: ${{ vars.APP_NAME }}-${{ inputs.functionType }}-${{ inputs.envCode }}-${{ vars.INSTANCE_NUMBER }}
       #Bicep: var functionAppName = toLower('${lowerAppName}-func-${sanitizedEnvironment}')
 
     steps:

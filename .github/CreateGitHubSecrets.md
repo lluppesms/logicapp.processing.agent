@@ -34,7 +34,8 @@ gh auth login
 
 gh variable set APP_NAME -b XXX-lapagent
 gh variable set RESOURCE_GROUP_LOCATION -b eastus
-gh variable set RESOURCE_GROUP_PREFIX -b rg_lapagent-web
+gh variable set RESOURCE_GROUP_PREFIX -b rg_lapagent
+gh variable set INSTANCE_NUMBER -b 1
 
 gh variable set INTAKE_PROJECT_FOLDER_NAME -b src/intake-function
 gh variable set INTAKE_PROJECT_NAME -b Processor.Agent.Intake

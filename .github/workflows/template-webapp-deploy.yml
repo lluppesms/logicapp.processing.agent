@@ -26,7 +26,7 @@ jobs:
       name: ${{ inputs.envCode }}
     env:
       artifactName: webapp
-      generatedAppEnvName: ${{ inputs.envCode == 'prod' && vars.ACCEPTOR_NAME || format('{0}-{1}', vars.ACCEPTOR_NAME, inputs.envCode) }}
+      generatedAppEnvName: ${{ inputs.envCode == 'prod' && vars.ACCEPTOR_NAME || format('{0}-{1}-{2}', vars.ACCEPTOR_NAME, inputs.envCode, vars.INSTANCE_NUMBER) }}
      # Bicep: var webSiteName = environmentCode == 'prod' ? toLower(sanitizedAppNameWithDashes) : toLower('${sanitizedAppNameWithDashes}-${sanitizedEnvironment}')
 
     steps:

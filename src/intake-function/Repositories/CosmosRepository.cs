@@ -1,36 +1,33 @@
+using Microsoft.Azure.Cosmos;
+
 namespace Processor.Agent.Intake.Repositories;
 
 public class CosmosRepository : ICosmosRepository
 {
-    private readonly CosmosClient _cosmosClient;
     private readonly Container _requestsContainer;
     private readonly Container _processTypesContainer;
     private readonly ILogger<CosmosRepository> _logger;
 
-    public CosmosRepository(IConfiguration configuration, ILogger<CosmosRepository> logger)
+    public CosmosRepository(CosmosClient cosmosClient, IConfiguration configuration, ILogger<CosmosRepository> logger)
     {
         _logger = logger;
+        _logger.Log(LogLevel.Information, "CosmosDbService.Init: Starting");
 
-        var accountEndpoint = configuration["CosmosDb:AccountEndpoint"] ?? throw new InvalidOperationException("CosmosDb:AccountEndpoint not configured");
         var databaseName = configuration["CosmosDb:DatabaseName"] ?? throw new InvalidOperationException("CosmosDb:DatabaseName not configured");
         var requestsContainerName = configuration["CosmosDb:RequestsContainerName"] ?? "ProcessRequests";
         var processTypesContainerName = configuration["CosmosDb:ProcessTypesContainerName"] ?? "ProcessTypes";
+        _logger.Log(LogLevel.Information, $"Database Name: {databaseName} Requests Container: {requestsContainerName} ProcessTypes Container: {processTypesContainerName}");
 
-        var cosmosOptions = new CosmosClientOptions
-        {
-            SerializerOptions = new CosmosSerializationOptions
-            {
-                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
-            }
-        };
+        cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName).GetAwaiter().GetResult();
+        var database = cosmosClient.GetDatabase(databaseName);
 
-        // Use DefaultAzureCredential for managed identity authentication
-        var visualStudioTenantId = configuration["VisualStudioTenantId"] ?? string.Empty;
-        var credential = GetCredentials(visualStudioTenantId);
-        
-        _cosmosClient = new CosmosClient(accountEndpoint, credential, cosmosOptions);
-        _requestsContainer = _cosmosClient.GetContainer(databaseName, requestsContainerName);
-        _processTypesContainer = _cosmosClient.GetContainer(databaseName, processTypesContainerName);
+        database.CreateContainerIfNotExistsAsync(requestsContainerName, "/id").GetAwaiter().GetResult();
+        _requestsContainer = database.GetContainer(requestsContainerName);
+
+        database.CreateContainerIfNotExistsAsync(processTypesContainerName, "/id").GetAwaiter().GetResult();
+        _processTypesContainer = database.GetContainer(processTypesContainerName);
+
+        _logger.Log(LogLevel.Information, "CosmosDbService.Init: Complete!");
     }
 
     public async Task<ProcessRequest> CreateRequestAsync(ProcessRequest request)
@@ -39,7 +36,7 @@ public class CosmosRepository : ICosmosRepository
         {
             var response = await _requestsContainer.CreateItemAsync(request, new PartitionKey(request.Id));
 
-            _logger.LogInformation("Created request with ID: {RequestId}", request.Id);
+            _logger.LogInformation($"Created request with ID: {request.Id}");
             return response.Resource;
         }
         catch (Exception ex)
@@ -64,7 +61,7 @@ public class CosmosRepository : ICosmosRepository
                 results.AddRange(response);
             }
 
-            _logger.LogInformation("Retrieved {Count} active process types", results.Count);
+            _logger.LogInformation($"Retrieved {results.Count} active process types");
             return results;
         }
         catch (Exception ex)

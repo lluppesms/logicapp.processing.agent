@@ -9,7 +9,6 @@ builder.Services
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddSingleton<ICosmosRepository, CosmosRepository>();
-builder.Services.AddSingleton<IValidationService, ValidationService>();
+builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Build().Run();

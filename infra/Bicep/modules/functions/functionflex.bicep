@@ -60,7 +60,7 @@ var baseAppSettings = {
 
 // --------------------------------------------------------------------------------
 module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
-  name: 'flexapp${deploymentSuffix}'
+  name: 'func${functionAppName}${deploymentSuffix}'
   params: {
     name: functionAppName
     location: location

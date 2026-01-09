@@ -221,7 +221,7 @@ module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
     deploymentSuffix: deploymentSuffix
     customAppSettings: {
       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
-      CosmosDb__ConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__ConnectionString__Unused: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       CosmosDb__DatabaseName: cosmosDatabaseName
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
@@ -267,7 +267,7 @@ module acceptorFunctionAppModule 'modules/functions/functionflex.bicep' = {
     deploymentSuffix: deploymentSuffix
     customAppSettings: {
       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
-      CosmosDb__ConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__ConnectionString__Unused: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       CosmosDb__DatabaseName: cosmosDatabaseName
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName

@@ -42,7 +42,7 @@ on:
         type: boolean
       runDeployCosmos:
         description: Update Cosmos DB
-        default: false
+        default: True
         type: boolean
       runSmokeTest:
         description: Run Smoke Tests

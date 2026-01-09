@@ -23,8 +23,13 @@ var lowerFunctionAppName1 = replace(toLower(functionAppName1), ' ', '')
 var lowerFunctionAppName2 = replace(toLower(functionAppName2), ' ', '')
 var lowerFunctionAppName3 = replace(toLower(functionAppName3), ' ', '')
 var lowerFunctionAppName4 = replace(toLower(functionAppName4), ' ', '')
+
 var sanitizedAppNameWithDashes = replace(replace(toLower(appName), ' ', ''), '_', '')
 var sanitizedAppName = replace(replace(replace(toLower(appName), ' ', ''), '-', ''), '_', '')
+var sanitizedFunctionAppName1 = replace(replace(replace(toLower(functionAppName1), ' ', ''), '-', ''), '_', '')
+var sanitizedFunctionAppName2 = replace(replace(replace(toLower(functionAppName2), ' ', ''), '-', ''), '_', '')
+var sanitizedFunctionAppName3 = replace(replace(replace(toLower(functionAppName3), ' ', ''), '-', ''), '_', '')
+var sanitizedFunctionAppName4 = replace(replace(replace(toLower(functionAppName4), ' ', ''), '-', ''), '_', '')
 
 // pull resource abbreviations from a common JSON file
 var resourceAbbreviations = loadJsonContent('./data/abbreviation.json')
@@ -43,22 +48,22 @@ var functionApp4Name = toLower('${lowerFunctionAppName4}-${resourceAbbreviations
 output functionApp1Name string            = functionApp1Name
 output functionApp1ServicePlanName string = '${functionApp1Name}-${resourceAbbreviations.webServerFarms}'
 output functionApp1InsightsName string    = '${functionApp1Name}-${resourceAbbreviations.webSitesAppService}'
-output functionApp1StorageName string     = take('${functionApp1Name}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+output functionApp1StorageName string     = take('${sanitizedFunctionAppName1}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
 
 output functionApp2Name string            = functionApp2Name
 output functionApp2ServicePlanName string = '${functionApp2Name}-${resourceAbbreviations.webSitesAppService}'
 output functionApp2InsightsName string    = '${functionApp2Name}-${resourceAbbreviations.insightsComponents}'
-output functionApp2StorageName string     = take('${functionApp2Name}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+output functionApp2StorageName string     = take('${sanitizedFunctionAppName2}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
 
 output functionApp3Name string            = functionApp3Name
 output functionApp3ServicePlanName string = '${functionApp3Name}-${resourceAbbreviations.webSitesAppService}'
 output functionApp3InsightsName string    = '${functionApp3Name}-${resourceAbbreviations.insightsComponents}'
-output functionApp3StorageName string     = take('${functionApp3Name}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+output functionApp3StorageName string     = take('${sanitizedFunctionAppName3}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
 
 output functionApp4Name string            = functionApp4Name
 output functionApp4ServicePlanName string = '${functionApp4Name}-${resourceAbbreviations.webSitesAppService}'
 output functionApp4InsightsName string    = '${functionApp4Name}-${resourceAbbreviations.insightsComponents}'
-output functionApp4StorageName string     = take('${functionApp4Name}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+output functionApp4StorageName string     = take('${sanitizedFunctionAppName4}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
 
 output logAnalyticsWorkspaceName string  = toLower('${sanitizedAppNameWithDashes}-${sanitizedEnvironment}-${resourceAbbreviations.operationalInsightsWorkspaces}')
 output cosmosDatabaseName string         = toLower('${sanitizedAppName}-${resourceAbbreviations.documentDBDatabaseAccounts}-${sanitizedEnvironment}')

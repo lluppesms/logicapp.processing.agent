@@ -4,10 +4,12 @@
 		"AzureWebJobsStorage": "UseDevelopmentStorage=true",
 		"FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
 		"CosmosDb": {
-			"ConnectionString": "AccountEndpoint=https://your-cosmos-account.documents.azure.com:443/;AccountKey=your-key-here",
+			"EITHER-Endpoint": "https://localhost:8081/",
+			"OR-ConnectionString": "AccountEndpoint=https://your-cosmos-account.documents.azure.com:443/;AccountKey=your-key-here",
 			"DatabaseName": "lapagentData-azd",
 			"RequestsContainerName": "ProcessRequests",
 			"ProcessTypesContainerName": "ProcessTypes"
-		}
+		},
+		"VisualStudioTenantId": "xxxxxx-xxxx-xxxx-xxxx-xxxxxx"
 	}
 }

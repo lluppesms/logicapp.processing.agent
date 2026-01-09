@@ -1,4 +1,6 @@
-﻿namespace Processor.Agent.Intake.Services;
+﻿using Microsoft.Azure.Cosmos.Serialization.HybridRow;
+
+namespace Processor.Agent.Intake.Services;
 
 public static class ServiceCollectionExtensions
 {
@@ -10,8 +12,12 @@ public static class ServiceCollectionExtensions
         // Configure Cosmos DB based on available settings
         var cosmosClientOptions = new CosmosClientOptions
         {
-            MaxRetryAttemptsOnRateLimitedRequests = 3,
-            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30)
+            MaxRetryAttemptsOnRateLimitedRequests = 2,
+            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),
+            SerializerOptions = new CosmosSerializationOptions
+            {
+                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+            }
         };
 
         var cosmosEndpoint = configuration["CosmosDb:Endpoint"];

@@ -7,15 +7,18 @@ public class CosmosRepository : ICosmosRepository
     private readonly Container _requestsContainer;
     private readonly Container _processTypesContainer;
     private readonly ILogger<CosmosRepository> _logger;
+    private string databaseName = string.Empty;
+    private string requestsContainerName = string.Empty;
+    private string processTypesContainerName = string.Empty;
 
     public CosmosRepository(CosmosClient cosmosClient, IConfiguration configuration, ILogger<CosmosRepository> logger)
     {
         _logger = logger;
         _logger.Log(LogLevel.Information, "CosmosDbService.Init: Starting");
 
-        var databaseName = configuration["CosmosDb:DatabaseName"] ?? throw new InvalidOperationException("CosmosDb:DatabaseName not configured");
-        var requestsContainerName = configuration["CosmosDb:RequestsContainerName"] ?? "ProcessRequests";
-        var processTypesContainerName = configuration["CosmosDb:ProcessTypesContainerName"] ?? "ProcessTypes";
+        databaseName = configuration["CosmosDb:DatabaseName"] ?? throw new InvalidOperationException("CosmosDb:DatabaseName not configured");
+        requestsContainerName = configuration["CosmosDb:RequestsContainerName"] ?? "ProcessRequests";
+        processTypesContainerName = configuration["CosmosDb:ProcessTypesContainerName"] ?? "ProcessTypes";
         _logger.Log(LogLevel.Information, $"Database Name: {databaseName} Requests Container: {requestsContainerName} ProcessTypes Container: {processTypesContainerName}");
 
         cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName).GetAwaiter().GetResult();
@@ -36,7 +39,7 @@ public class CosmosRepository : ICosmosRepository
         {
             var response = await _requestsContainer.CreateItemAsync(request, new PartitionKey(request.Id));
 
-            _logger.LogInformation($"Created request with ID: {request.Id}");
+            _logger.LogInformation($"  Created Cosmos {requestsContainerName} with ID: {request.Id}");
             return response.Resource;
         }
         catch (Exception ex)
@@ -50,8 +53,7 @@ public class CosmosRepository : ICosmosRepository
     {
         try
         {
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.isActive = @isActive")
-                .WithParameter("@isActive", true);
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.isActive = @isActive").WithParameter("@isActive", true);
             var iterator = _processTypesContainer.GetItemQueryIterator<ProcessType>(query);
 
             var results = new List<ProcessType>();
@@ -61,7 +63,7 @@ public class CosmosRepository : ICosmosRepository
                 results.AddRange(response);
             }
 
-            _logger.LogInformation($"Retrieved {results.Count} active process types");
+            _logger.LogInformation($"  Retrieved {results.Count} active process types");
             return results;
         }
         catch (Exception ex)

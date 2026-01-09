@@ -79,8 +79,7 @@ module logAnalyticsWorkspaceModule 'modules/monitor/loganalytics.bicep' = {
   name: 'logAnalytics${deploymentSuffix}'
   params: {
     newLogAnalyticsName: resourceNames.outputs.logAnalyticsWorkspaceName
-    newWebApplicationInsightsName: resourceNames.outputs.webSiteAppInsightsName
-    // newFunctionApplicationInsightsName: '' // No longer deploying functions
+    newWebApplicationInsightsName: resourceNames.outputs.appInsightsName
     location: location
     tags: commonTags
   }

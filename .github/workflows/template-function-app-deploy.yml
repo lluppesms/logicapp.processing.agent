@@ -31,8 +31,10 @@ jobs:
 
     env:
       artifactName: functionapp
-      generatedAppEnvName: ${{ vars.APP_NAME }}-${{ inputs.functionSubName }}-${{ inputs.envCode }}-${{ vars.INSTANCE_NUMBER }}
-      #Bicep: var lowerFunctionAppName2 = replace(toLower('${appName}-${functionAppName2}-${instanceNumber}'), ' ', '')
+      generatedAppEnvName: ${{ format('func-{0}{1}-{2}-{3}', vars.APP_NAME, vars.INSTANCE_NUMBER, inputs.functionSubName, inputs.envCode) }}
+      #Bicep:
+      #  var sanitizedAppNameInstance   = replace(replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '-', ''), '_', '')
+      #  output functionApp1Name string = toLower('${resourceAbbreviations.functionApp}-${sanitizedAppNameInstance}-${functionAppName1}-${sanitizedEnvironment}')
 
     steps:
     - name: Download build artifacts

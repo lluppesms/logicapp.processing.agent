@@ -15,13 +15,13 @@ param dataStorageNameSuffix string = 'data'
 
 // --------------------------------------------------------------------------------
 var sanitizedEnvironment  = toLower(environmentCode)
-var sanitizedAppName = replace(replace(replace(toLower('${appName}'), ' ', ''), '-', ''), '_', '')
-var sanitizedAppNameInstance = replace(replace(replace(toLower('${appName}-${instanceNumber}'), ' ', ''), '-', ''), '_', '')
-var lowerFunctionAppName1 = replace(toLower('${sanitizedAppName}-${functionAppName1}-${instanceNumber}'), ' ', '')
-var lowerFunctionAppName2 = replace(toLower('${sanitizedAppName}-${functionAppName2}-${instanceNumber}'), ' ', '')
-var lowerFunctionAppName3 = replace(toLower('${sanitizedAppName}-${functionAppName3}-${instanceNumber}'), ' ', '')
-var lowerFunctionAppName4 = replace(toLower('${sanitizedAppName}-${functionAppName4}-${instanceNumber}'), ' ', '')
-var lowerFunctionAppName5 = replace(toLower('${sanitizedAppName}-${functionAppName5}-${instanceNumber}'), ' ', '')
+//var sanitizedAppName = replace(replace(replace(toLower('${appName}'), ' ', ''), '-', ''), '_', '')
+var sanitizedAppNameInstance = replace(replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '-', ''), '_', '')
+var lowerFunctionAppName1 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName1}'), ' ', '')
+var lowerFunctionAppName2 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName2}'), ' ', '')
+var lowerFunctionAppName3 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName3}'), ' ', '')
+var lowerFunctionAppName4 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName4}'), ' ', '')
+var lowerFunctionAppName5 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName5}'), ' ', '')
 
 // pull resource abbreviations from a common JSON file
 var resourceAbbreviations = loadJsonContent('./data/abbreviation.json')

@@ -58,7 +58,7 @@ jobs:
       runGHASScan: ${{ inputs.runSecurityScan }}
 
 # ------------------------------------------------------------------------------------------------------------------------
-  build-function:
+  build-intake-function:
     name: Build Function App
     uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.functionAppAction != 'ignore'
@@ -72,16 +72,16 @@ jobs:
       testApplication: true
       listFilesAfterBuild: true
 
-  deploy-function:
+  deploy-intake-function:
     name: Deploy Function
     uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.functionAppAction == 'deploy'
     # the login seems to crash if you try to deploy both web and function at the same time...???
-    needs: build-function
+    needs: build-intake-function
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      functionType: 'flex'
+      functionSubName: 'intake'
       listFilesBeforeDeploy: true
 
 # ------------------------------------------------------------------------------------------------------------------------

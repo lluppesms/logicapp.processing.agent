@@ -27,14 +27,34 @@ var lowerFunctionAppName5 = replace(toLower('${sanitizedAppNameInstance}-${funct
 var resourceAbbreviations = loadJsonContent('./data/abbreviation.json')
 
 // --------------------------------------------------------------------------------
-output appServicePlanName string         = toLower('${resourceAbbreviations.webServerFarms}-${sanitizedAppNameInstance}-${sanitizedEnvironment}')
-output appInsightsName string            = toLower('${resourceAbbreviations.insightsComponents}-${sanitizedAppNameInstance}-${sanitizedEnvironment}')
+output appInsightsName string             = toLower('${resourceAbbreviations.insightsComponents}-${sanitizedAppNameInstance}-${sanitizedEnvironment}')
 
-output functionApp1Name string           = toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName1}-${sanitizedEnvironment}')
-output functionApp2Name string           = toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName2}-${sanitizedEnvironment}')
-output functionApp3Name string           = toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName3}-${sanitizedEnvironment}')
-output functionApp4Name string           = toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName4}-${sanitizedEnvironment}')
-output functionApp5Name string           = toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName5}-${sanitizedEnvironment}')
+// --------------------------------------------------------------------------------
+output functionApp1 object = {
+    name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName1}-${sanitizedEnvironment}')
+    servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName1}-${sanitizedEnvironment}')
+    deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName1}')
+}
+output functionApp2 object = {
+    name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName2}-${sanitizedEnvironment}')
+    servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName2}-${sanitizedEnvironment}')
+    deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName2}')
+}
+output functionApp3 object = {
+    name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName3}-${sanitizedEnvironment}')
+    servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName3}-${sanitizedEnvironment}')
+    deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName3}')
+}
+output functionApp4 object = {
+    name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName4}-${sanitizedEnvironment}')
+    servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName4}-${sanitizedEnvironment}')
+    deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName4}')
+}
+output functionApp5 object = {
+    name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName5}-${sanitizedEnvironment}')
+    servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName5}-${sanitizedEnvironment}')
+    deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName5}')
+}
 
 // --------------------------------------------------------------------------------
 output logAnalyticsWorkspaceName string  = toLower('${resourceAbbreviations.operationalInsightsWorkspaces}-${sanitizedAppNameInstance}-${sanitizedEnvironment}')

@@ -124,7 +124,7 @@ module appIdentityRoleAssignments './modules/iam/role-assignments.bicep' = if (a
     principalType: 'ServicePrincipal'
     cosmosName: cosmosModule.outputs.name
     keyVaultName: keyVaultModule.outputs.name
-    storageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
   }
 }
 
@@ -135,7 +135,7 @@ module adminUserRoleAssignments './modules/iam/role-assignments.bicep' = if (add
     principalType: 'User'
     cosmosName: cosmosModule.outputs.name
     keyVaultName: keyVaultModule.outputs.name
-    storageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
   }
 }
 
@@ -192,30 +192,32 @@ module keyVaultSecretOpenAI './modules/security/keyvault-secret.bicep' = {
 // Function Flex Consumption - Shared Infrastructure (App Service Plan, App Insights, Storage)
 // This is deployed once and shared by all function apps
 // --------------------------------------------------------------------------------
-module flexFunctionServicePlanModule 'modules/functions/functionserviceplan.bicep' = {
-  name: 'flexFunctionServicePlan${deploymentSuffix}'
+module flexFunctionResourcesModule 'modules/functions/functionresources.bicep' = {
+  name: 'flexFunctionResources${deploymentSuffix}'
   params: {
-    functionAppServicePlanName: resourceNames.outputs.appServicePlanName
     functionInsightsName: resourceNames.outputs.appInsightsName
     functionStorageAccountName: resourceNames.outputs.storageAccountName
     location: location
     commonTags: commonTags
     workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId
-    deploymentSuffix: deploymentSuffix
   }
 }
 
 // --------------------------------------------------------------------------------
-// Function App 1 - Main Processing Function
+// Flex Function App 1 - Main Processing Function - Intake Processor
 // --------------------------------------------------------------------------------
-module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
-  name: 'intakeFunctionApp${deploymentSuffix}'
+module functionApp1FlexModule 'modules/functions/functionflex.bicep' = {
+  name: 'flexFunction1${deploymentSuffix}'
   params: {
-    functionAppName: resourceNames.outputs.functionApp1Name
-    functionAppServicePlanName: flexFunctionServicePlanModule.outputs.appServicePlanName
-    functionInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
-    functionStorageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
-    deploymentStorageContainerName: flexFunctionServicePlanModule.outputs.deploymentStorageContainerName
+    functionAppName: resourceNames.outputs.functionApp1.name
+    functionAppServicePlanName: resourceNames.outputs.functionApp1.servicePlanName
+    deploymentStorageContainerName: resourceNames.outputs.functionApp1.deploymentStorageContainerName
+    functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    addRoleAssignments: addRoleAssignments
+    appInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    keyVaultName: keyVaultModule.outputs.name
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix
@@ -239,29 +241,21 @@ module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
   }
 }
 
-// Role assignments for Function App 1
-module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
-  name: 'intakeFunctionApp-roles${deploymentSuffix}'
+// --------------------------------------------------------------------------------
+// Flex Function App 2 - Acceptor Function (Cosmos DB triggered intake processor)
+// --------------------------------------------------------------------------------
+module functionApp2FlexModule 'modules/functions/functionflex.bicep' = {
+  name: 'flexFunction2${deploymentSuffix}'
   params: {
-    identityPrincipalId: functionFlexApp1Module.outputs.functionAppPrincipalId
-    principalType: 'ServicePrincipal'
-    appInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
-    storageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
+    functionAppName: resourceNames.outputs.functionApp2.name
+    functionAppServicePlanName: resourceNames.outputs.functionApp2.servicePlanName
+    deploymentStorageContainerName: resourceNames.outputs.functionApp2.deploymentStorageContainerName
+    functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    addRoleAssignments: addRoleAssignments
+    appInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
     keyVaultName: keyVaultModule.outputs.name
-  }
-}
-
-// --------------------------------------------------------------------------------
-// Function App 2 - Acceptor Function (Cosmos DB triggered intake processor)
-// --------------------------------------------------------------------------------
-module acceptorFunctionAppModule 'modules/functions/functionflex.bicep' = {
-  name: 'acceptorFunctionApp${deploymentSuffix}'
-  params: {
-    functionAppName: resourceNames.outputs.functionApp2Name
-    functionAppServicePlanName: flexFunctionServicePlanModule.outputs.appServicePlanName
-    functionInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
-    functionStorageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
-    deploymentStorageContainerName: flexFunctionServicePlanModule.outputs.deploymentStorageContainerName
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix
@@ -285,21 +279,8 @@ module acceptorFunctionAppModule 'modules/functions/functionflex.bicep' = {
   }
 }
 
-// Role assignments for Acceptor Function App
-module acceptorFunctionAppRoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
-  name: 'acceptorFunctionApp-roles${deploymentSuffix}'
-  params: {
-    identityPrincipalId: acceptorFunctionAppModule.outputs.functionAppPrincipalId
-    principalType: 'ServicePrincipal'
-    appInsightsName: flexFunctionServicePlanModule.outputs.appInsightsName
-    storageAccountName: flexFunctionServicePlanModule.outputs.storageAccountName
-    keyVaultName: keyVaultModule.outputs.name
-    cosmosName: cosmosModule.outputs.name
-  }
-}
 // --------------------------------------------------------------------------------
 output SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP_NAME string = resourceGroupName
-output FUNCTION1_HOST_NAME string = functionFlexApp1Module.outputs.hostname
-output ACCEPTOR_FUNCTION_HOST_NAME string = acceptorFunctionAppModule.outputs.hostname
-//output WEB_HOST_NAME string = webSiteModule.outputs.hostName
+output INTAKE_HOST_NAME string = functionApp1FlexModule.outputs.hostname
+output ACCEPTOR_FUNCTION_HOST_NAME string = functionApp2FlexModule.outputs.hostname

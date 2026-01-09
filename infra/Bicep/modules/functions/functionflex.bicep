@@ -8,6 +8,12 @@ param functionInsightsName string
 param functionStorageAccountName string
 param deploymentStorageContainerName string = ''
 
+@description('SKU name for App Service Plan')
+param appServicePlanSkuName string = 'FC1'
+
+@description('SKU tier for App Service Plan')
+param appServicePlanTier string = 'FlexConsumption'
+
 param customAppSettings object = {}
 
 @allowed(['functionapp', 'functionapp,linux'])
@@ -19,6 +25,11 @@ param runtimeVersion string = '10.0'
 param maximumInstanceCount int = 50
 @allowed([512, 2048, 4096])
 param instanceMemoryMB int = 2048
+
+param addRoleAssignments bool = true
+param appInsightsName string
+param storageAccountName string
+param keyVaultName string
 
 param location string = resourceGroup().location
 param commonTags object = {}
@@ -44,10 +55,6 @@ resource storageAccountResource 'Microsoft.Storage/storageAccounts@2023-01-01' e
 }
 var storagePrimaryBlobEndpoint string = storageAccountResource.properties.primaryEndpoints.blob
 
-resource appServiceResource 'Microsoft.Web/serverfarms@2023-12-01' existing = {
-  name: functionAppServicePlanName
-}
-
 var baseAppSettings = {
     AzureWebJobsStorage__accountName: functionStorageAccountName
     AzureWebJobsStorage__credential: 'managedidentity'
@@ -59,6 +66,21 @@ var baseAppSettings = {
 }
 
 // --------------------------------------------------------------------------------
+// App Service Plan for Flex Consumption functions
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+  name: functionAppServicePlanName
+  location: location
+  tags: functionTags
+  kind: 'functionapp'
+  sku: {
+    name: appServicePlanSkuName
+    tier: appServicePlanTier
+  }
+  properties: {
+    reserved: true
+  }
+}
+
 module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
   name: 'func${functionAppName}${deploymentSuffix}'
   params: {
@@ -69,7 +91,7 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
     managedIdentities: {
       systemAssigned: true
     }
-    serverFarmResourceId: appServiceResource.id
+    serverFarmResourceId: appServicePlan.id
     functionAppConfig: {
       deployment: {
         storage: {
@@ -96,6 +118,17 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
       name: 'appsettings'
       properties: union(baseAppSettings, customAppSettings)
     }]
+  }
+}
+
+module functionRoleAssignments '../iam/role-assignments.bicep' = if (addRoleAssignments) {
+  name: 'func${functionAppName}-roles${deploymentSuffix}'
+  params: {
+    identityPrincipalId: functionAppResource.outputs.systemAssignedMIPrincipalId
+    principalType: 'ServicePrincipal'
+    appInsightsName: appInsightsName
+    storageAccountName: storageAccountName
+    keyVaultName: keyVaultName
   }
 }
 

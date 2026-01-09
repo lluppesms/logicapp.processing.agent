@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------------------------------------
-// This BICEP file will create an .NET 10 Isolated Azure Function
+// This BICEP file will create an .NET 10 Isolated Azure Flex Function
 // See: https://github.com/Azure-Samples/azure-functions-flex-consumption-samples/blob/main/IaC/bicep/main.bicep
+// Note that each flex function has to have it's own service plan, so that's in here also.
 // ----------------------------------------------------------------------------------------------------
 param functionAppName string
 param functionAppServicePlanName string

@@ -1,3 +1,4 @@
+using Azure.Core;
 using Microsoft.Azure.Cosmos;
 
 namespace Processor.Agent.Intake.Repositories;
@@ -61,6 +62,16 @@ public class CosmosRepository : ICosmosRepository
             {
                 var response = await iterator.ReadNextAsync();
                 results.AddRange(response);
+            }
+
+            if (results.Count <= 0)
+            {
+                _logger.LogWarning("  No active process types found in Cosmos DB -- adding 1 default record!");
+                var defaultProcessType = new ProcessType {
+                    Id = "1", Name = "PROCESS_TEST", Description =  "Process Testing", IsActive =  true
+                };
+                var response = await _processTypesContainer.CreateItemAsync(defaultProcessType, new PartitionKey(defaultProcessType.Id));
+                results.Add(defaultProcessType);
             }
 
             _logger.LogInformation($"  Retrieved {results.Count} active process types");

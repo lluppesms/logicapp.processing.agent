@@ -242,39 +242,30 @@ module functionApp1FlexModule 'modules/functions/functionflex.bicep' = {
 }
 
 // --------------------------------------------------------------------------------
-// Flex Function App 2 - Acceptor Function (Cosmos DB triggered intake processor)
+// Logic App - Acceptor Workflow (Cosmos DB triggered intake processor)
 // --------------------------------------------------------------------------------
-module functionApp2FlexModule 'modules/functions/functionflex.bicep' = {
-  name: 'flexFunction2${deploymentSuffix}'
+module logicAppModule 'modules/logicapp/logicapp.bicep' = {
+  name: 'logicApp${deploymentSuffix}'
   params: {
-    functionAppName: resourceNames.outputs.functionApp2.name
-    functionAppServicePlanName: resourceNames.outputs.functionApp2.servicePlanName
-    deploymentStorageContainerName: resourceNames.outputs.functionApp2.deploymentStorageContainerName
-    functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
-    functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
-    addRoleAssignments: addRoleAssignments
+    logicAppName: resourceNames.outputs.functionApp2.name
+    logicAppServicePlanName: resourceNames.outputs.functionApp2.servicePlanName
     appInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
     storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    addRoleAssignments: addRoleAssignments
     keyVaultName: keyVaultModule.outputs.name
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix
+    cosmosDbAccountName: cosmosModule.outputs.name
+    cosmosDbDatabaseName: cosmosDatabaseName
+    cosmosDbContainerName: processRequestsContainerName
+    adminEmailAddress: 'admin@example.com'
     customAppSettings: {
       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
       CosmosDb__ConnectionString__Unused: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       CosmosDb__DatabaseName: cosmosDatabaseName
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
-      // Settings for Function with Cosmos trigger -- no sub levels
-      CosmosDbDatabaseName: cosmosDatabaseName
-      CosmosDbContainerName: processRequestsContainerName
-      CosmosDbConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
-      // OpenAI settings
-      OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
-      OpenAI__Chat__Endpoint: OpenAI_Endpoint
-      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretOpenAI.outputs.secretName})'
-      OpenAI__Chat__ModelName: OpenAI_ModelName
-      OpenAI__Chat__Temperature: OpenAI_Temperature
     }
   }
 }
@@ -283,4 +274,4 @@ module functionApp2FlexModule 'modules/functions/functionflex.bicep' = {
 output SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP_NAME string = resourceGroupName
 output INTAKE_HOST_NAME string = functionApp1FlexModule.outputs.hostname
-output ACCEPTOR_FUNCTION_HOST_NAME string = functionApp2FlexModule.outputs.hostname
+output ACCEPTOR_LOGICAPP_HOST_NAME string = logicAppModule.outputs.hostname

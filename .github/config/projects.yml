@@ -24,9 +24,9 @@ projects:
 
   acceptor:
     shortName: 'accept'
-    rootDirectory: 'src/acceptor-logicapp'
+    rootDirectory: 'src/acceptor-function'
     projectName: 'Processor.Agent.Acceptor'
-    testDirectory: 'src/acceptor-logicapp-tests'
+    testDirectory: 'src/acceptor-function-tests'
     testProjectName: 'Processor.Agent.Acceptor.Tests'
 
   processor:

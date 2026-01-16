@@ -151,10 +151,10 @@ jobs:
 #       listFilesBeforeDeploy: true
       
 # ------------------------------------------------------------------------------------------------------------------------
-  build-logicapp:
-    name: Build Logic App
+  build-acceptor-function:
+    name: Build Acceptor Function App
     uses: ./.github/workflows/template-function-app-build.yml
-    if: inputs.logicAppAction != 'ignore'
+    if: inputs.functionAppAction != 'ignore'
     secrets: inherit
     needs: [load-config]
     with:
@@ -167,11 +167,11 @@ jobs:
       testApplication: true
       listFilesAfterBuild: true
 
-  deploy-logicapp:
-    name: Deploy LogicApp ${{ inputs.deployEnvironment }}
+  deploy-acceptor-function:
+    name: Deploy Acceptor Function App ${{ inputs.deployEnvironment }}
     uses: ./.github/workflows/template-function-app-deploy.yml
-    if: inputs.logicAppAction == 'deploy'
-    needs: [load-config, build-logicapp]
+    if: inputs.functionAppAction == 'deploy'
+    needs: [load-config, build-acceptor-function]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}

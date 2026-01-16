@@ -1,24 +1,14 @@
 // -------------------------------------------------------------------------------------------------
 // This BICEP file creates the shared infrastructure for Azure Functions Flex Consumption
-// - App Service Plan (Flex Consumption)
 // - Application Insights
 // - Storage Account (for function deployment packages)
 // -------------------------------------------------------------------------------------------------
-
-@description('Name of the App Service Plan for functions')
-param functionAppServicePlanName string
 
 @description('Name of the Application Insights instance')
 param functionInsightsName string
 
 @description('Name of the storage account for function deployment')
 param functionStorageAccountName string
-
-@description('SKU name for App Service Plan')
-param appServicePlanSkuName string = 'FC1'
-
-@description('SKU tier for App Service Plan')
-param appServicePlanTier string = 'FlexConsumption'
 
 @description('Location for all resources')
 param location string = resourceGroup().location
@@ -29,14 +19,9 @@ param commonTags object = {}
 @description('The workspace to store audit logs')
 param workspaceId string = ''
 
-@description('Deployment suffix for unique naming')
-param deploymentSuffix string = ''
-
 // --------------------------------------------------------------------------------
 var templateTag = { TemplateFile: '~functionserviceplan.bicep' }
-var azdTag = { 'azd-service-name': 'function' }
 var tags = union(commonTags, templateTag)
-var functionTags = union(commonTags, templateTag, azdTag)
 var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location))
 var deploymentStorageContainerName = 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
 
@@ -89,25 +74,8 @@ resource deploymentContainer 'Microsoft.Storage/storageAccounts/blobServices/con
   name: deploymentStorageContainerName
 }
 
-// App Service Plan for Flex Consumption functions
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
-  name: functionAppServicePlanName
-  location: location
-  tags: functionTags
-  kind: 'functionapp'
-  sku: {
-    name: appServicePlanSkuName
-    tier: appServicePlanTier
-  }
-  properties: {
-    reserved: true
-  }
-}
-
 // --------------------------------------------------------------------------------
 // Outputs
-output appServicePlanResourceId string = appServicePlan.id
-output appServicePlanName string = appServicePlan.name
 output appInsightsConnectionString string = applicationInsights.properties.ConnectionString
 output appInsightsInstrumentationKey string = applicationInsights.properties.InstrumentationKey
 output appInsightsName string = applicationInsights.name

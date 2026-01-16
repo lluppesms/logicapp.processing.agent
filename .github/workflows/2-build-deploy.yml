@@ -4,7 +4,7 @@
 # FYI: You need to set up some secrets before running this workflows - see CreateGitHubSecrets.md for details.
 # ------------------------------------------------------------------------------------------------------------------------
 name: 2.build.deploy
-run-name: '2 - Build/Deploy Apps using ENV ${{ inputs.deployEnvironment }} by @${{ github.actor }}'
+run-name: '2 - Build/Deploy Apps using ENV ${{ inputs.deployEnvironment }} ${{vars.INSTANCE_NUMBER}} by @${{ github.actor }}'
 
 on: 
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
         type: environment
       logicAppAction:
         description: Logic App
-        default: ignore 
+        default: deploy 
         type: choice
         options:
           - ignore
@@ -23,7 +23,7 @@ on:
           - deploy 
       functionAppAction:
         description: Function
-        default: ignore 
+        default: deploy 
         type: choice
         options:
           - ignore
@@ -48,6 +48,11 @@ permissions:
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
+  # load the project configuration variables once for all jobs
+  load-config:
+    uses: ./.github/workflows/template-load-config.yml
+
+  # ------------------------------------------------------------------------------------------------------------------------
   scan-code:
     name: Scan Source Code
     uses: ./.github/workflows/template-scan-code.yml
@@ -58,54 +63,58 @@ jobs:
       runGHASScan: ${{ inputs.runSecurityScan }}
 
 # ------------------------------------------------------------------------------------------------------------------------
-  build-function:
-    name: Build Function App
+  build-intake-function:
+    name: Build Intake Function App
     uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.functionAppAction != 'ignore'
     secrets: inherit
+    needs: load-config
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
-      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
+      rootDirectory: ${{ needs.load-config.outputs.intake_rootDirectory }}
+      projectName: ${{ needs.load-config.outputs.intake_projectName }}
+      testDirectory: ${{ needs.load-config.outputs.intake_testDirectory }}
+      testProjectName: ${{ needs.load-config.outputs.intake_testProjectName }}
+      functionSubName:  ${{ needs.load-config.outputs.intake_shortName }}
       testApplication: true
       listFilesAfterBuild: true
 
-  deploy-function:
-    name: Deploy Function
+  deploy-intake-function:
+    name: Deploy Intake Function
     uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.functionAppAction == 'deploy'
-    # the login seems to crash if you try to deploy both web and function at the same time...???
-    needs: build-function
+    needs: [load-config, build-intake-function]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      functionType: 'flex'
+      functionSubName: ${{ needs.load-config.outputs.intake_shortName }}
       listFilesBeforeDeploy: true
 
 # ------------------------------------------------------------------------------------------------------------------------
   build-logicapp:
-    name: Build Logic App
-    uses: ./.github/workflows/template-webapp-build.yml
+    name: Build Acceptor Logic App
+    uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.logicAppAction != 'ignore'
     secrets: inherit
+    needs: [load-config]
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
-      testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
+      rootDirectory: ${{ needs.load-config.outputs.acceptor_rootDirectory }}
+      projectName: ${{ needs.load-config.outputs.acceptor_projectName }}
+      testDirectory: ${{ needs.load-config.outputs.acceptor_testDirectory }}
+      testProjectName: ${{ needs.load-config.outputs.acceptor_testProjectName }}
+      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
       testApplication: true
       listFilesAfterBuild: true
 
   deploy-logicapp:
-    name: Deploy LogicApp ${{ inputs.deployEnvironment }}
-    uses: ./.github/workflows/template-webapp-deploy.yml
+    name: Deploy Acceptor LogicApp ${{ inputs.deployEnvironment }}
+    uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.logicAppAction == 'deploy'
-    needs: build-logicapp
+    needs: [load-config, build-logicapp]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
+      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
       listFilesBeforeDeploy: true
 

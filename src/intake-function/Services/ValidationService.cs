@@ -73,14 +73,14 @@ public class ValidationService(ICosmosRepository repository, IMemoryCache cache,
     {
         if (!_cache.TryGetValue(ProcessTypesCacheKey, out IEnumerable<ProcessType>? processTypes))
         {
-            _logger.LogInformation("Process types not in cache, fetching from database");
+            _logger.LogInformation("  Process types not in cache, fetching from database");
             processTypes = await _repository.GetProcessTypesAsync();
 
             var cacheOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(CacheDuration);
 
             _cache.Set(ProcessTypesCacheKey, processTypes, cacheOptions);
-            _logger.LogInformation("Cached {Count} process types for {Duration} minutes", processTypes.Count(), CacheDuration.TotalMinutes);
+            _logger.LogInformation("  Cached {Count} process types for {Duration} minutes", processTypes.Count(), CacheDuration.TotalMinutes);
         }
         else
         {

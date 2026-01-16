@@ -1,0 +1,144 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# GHA Reusable Workflow to Load All Project Configurations
+# ------------------------------------------------------------------------------------------------------------------------
+# Usage in calling workflow:
+#   jobs:
+#     load-config:
+#       uses: ./.github/workflows/template-load-config.yml
+#     
+#     build-intake:
+#       needs: load-config
+#       uses: ./.github/workflows/template-function-app-build.yml
+#       with:
+#         rootDirectory: ${{ needs.load-config.outputs.intake_rootDirectory }}
+#         projectName: ${{ needs.load-config.outputs.intake_projectName }}
+#
+#     build-acceptor:
+#       needs: load-config
+#       uses: ./.github/workflows/template-webapp-build.yml
+#       with:
+#         rootDirectory: ${{ needs.load-config.outputs.acceptor_rootDirectory }}
+#         projectName: ${{ needs.load-config.outputs.acceptor_projectName }}
+# ------------------------------------------------------------------------------------------------------------------------
+name: z_template_load_config
+run-name: Load Project Config
+
+on:
+  workflow_call:
+    outputs:
+      # Intake project
+      intake_shortName:
+        description: 'Intake project short name'
+        value: ${{ jobs.load.outputs.intake_shortName }}
+      intake_rootDirectory:
+        description: 'Intake project root directory'
+        value: ${{ jobs.load.outputs.intake_rootDirectory }}
+      intake_projectName:
+        description: 'Intake project name'
+        value: ${{ jobs.load.outputs.intake_projectName }}
+      intake_testDirectory:
+        description: 'Intake test directory'
+        value: ${{ jobs.load.outputs.intake_testDirectory }}
+      intake_testProjectName:
+        description: 'Intake test project name'
+        value: ${{ jobs.load.outputs.intake_testProjectName }}
+      
+      # Acceptor project
+      acceptor_shortName:
+        description: 'Acceptor project short name'
+        value: ${{ jobs.load.outputs.acceptor_shortName }}
+      acceptor_rootDirectory:
+        description: 'Acceptor project root directory'
+        value: ${{ jobs.load.outputs.acceptor_rootDirectory }}
+      acceptor_projectName:
+        description: 'Acceptor project name'
+        value: ${{ jobs.load.outputs.acceptor_projectName }}
+      acceptor_testDirectory:
+        description: 'Acceptor test directory'
+        value: ${{ jobs.load.outputs.acceptor_testDirectory }}
+      acceptor_testProjectName:
+        description: 'Acceptor test project name'
+        value: ${{ jobs.load.outputs.acceptor_testProjectName }}
+      
+      # Processor project
+      processor_shortName:
+        description: 'Processor project short name'
+        value: ${{ jobs.load.outputs.processor_shortName }}
+      processor_rootDirectory:
+        description: 'Processor project root directory'
+        value: ${{ jobs.load.outputs.processor_rootDirectory }}
+      processor_projectName:
+        description: 'Processor project name'
+        value: ${{ jobs.load.outputs.processor_projectName }}
+      processor_testDirectory:
+        description: 'Processor test directory'
+        value: ${{ jobs.load.outputs.processor_testDirectory }}
+      processor_testProjectName:
+        description: 'Processor test project name'
+        value: ${{ jobs.load.outputs.processor_testProjectName }}
+      
+      # Data project
+      data_shortName:
+        description: 'Data project short name'
+        value: ${{ jobs.load.outputs.data_shortName }}
+      data_rootDirectory:
+        description: 'Data project root directory'
+        value: ${{ jobs.load.outputs.data_rootDirectory }}
+      data_projectName:
+        description: 'Data project name'
+        value: ${{ jobs.load.outputs.data_projectName }}
+      data_testDirectory:
+        description: 'Data test directory'
+        value: ${{ jobs.load.outputs.data_testDirectory }}
+      data_testProjectName:
+        description: 'Data test project name'
+        value: ${{ jobs.load.outputs.data_testProjectName }}
+
+      # List of all project keys
+      projectKeys:
+        description: 'Comma-separated list of all project keys'
+        value: ${{ jobs.load.outputs.projectKeys }}
+
+jobs:
+  load:
+    name: Load Project Config Settings
+    runs-on: ubuntu-latest
+    outputs:
+      # Intake
+      intake_shortName: ${{ steps.config.outputs.intake_shortName }}
+      intake_rootDirectory: ${{ steps.config.outputs.intake_rootDirectory }}
+      intake_projectName: ${{ steps.config.outputs.intake_projectName }}
+      intake_testDirectory: ${{ steps.config.outputs.intake_testDirectory }}
+      intake_testProjectName: ${{ steps.config.outputs.intake_testProjectName }}
+      # Acceptor
+      acceptor_shortName: ${{ steps.config.outputs.acceptor_shortName }}
+      acceptor_rootDirectory: ${{ steps.config.outputs.acceptor_rootDirectory }}
+      acceptor_projectName: ${{ steps.config.outputs.acceptor_projectName }}
+      acceptor_testDirectory: ${{ steps.config.outputs.acceptor_testDirectory }}
+      acceptor_testProjectName: ${{ steps.config.outputs.acceptor_testProjectName }}
+      # Processor
+      processor_shortName: ${{ steps.config.outputs.processor_shortName }}
+      processor_rootDirectory: ${{ steps.config.outputs.processor_rootDirectory }}
+      processor_projectName: ${{ steps.config.outputs.processor_projectName }}
+      processor_testDirectory: ${{ steps.config.outputs.processor_testDirectory }}
+      processor_testProjectName: ${{ steps.config.outputs.processor_testProjectName }}
+      # Data
+      data_shortName: ${{ steps.config.outputs.data_shortName }}
+      data_rootDirectory: ${{ steps.config.outputs.data_rootDirectory }}
+      data_projectName: ${{ steps.config.outputs.data_projectName }}
+      data_testDirectory: ${{ steps.config.outputs.data_testDirectory }}
+      data_testProjectName: ${{ steps.config.outputs.data_testProjectName }}
+      # Meta
+      projectKeys: ${{ steps.config.outputs.projectKeys }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/config
+            .github/actions
+
+      - name: Load all project configurations
+        id: config
+        uses: ./.github/actions/load-project-config

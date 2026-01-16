@@ -2,6 +2,7 @@
 global using Processor.Agent.Intake.Services;
 global using Processor.Agent.Data.Models;
 
+global using Azure.Identity;
 global using Microsoft.Azure.Cosmos;
 global using Microsoft.Azure.Functions.Worker;
 global using Microsoft.Azure.Functions.Worker.Http;

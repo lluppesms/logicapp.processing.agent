@@ -1,0 +1,135 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Composite Action to Load All Project Configurations
+# Usage: 
+#   - uses: ./.github/actions/load-project-config
+#   
+# Outputs are prefixed with project name, e.g.:
+#   steps.config.outputs.intake_rootDirectory
+#   steps.config.outputs.acceptor_projectName
+# ------------------------------------------------------------------------------------------------------------------------
+name: 'Load config/projects.yml'
+description: 'Loads project configurations from .github/config/projects.yml'
+
+outputs:
+  # Intake project
+  intake_shortName:
+    description: 'Intake project short name'
+    value: ${{ steps.load.outputs.intake_shortName }}
+  intake_rootDirectory:
+    description: 'Intake project root directory'
+    value: ${{ steps.load.outputs.intake_rootDirectory }}
+  intake_projectName:
+    description: 'Intake project name'
+    value: ${{ steps.load.outputs.intake_projectName }}
+  intake_testDirectory:
+    description: 'Intake test directory'
+    value: ${{ steps.load.outputs.intake_testDirectory }}
+  intake_testProjectName:
+    description: 'Intake test project name'
+    value: ${{ steps.load.outputs.intake_testProjectName }}
+  
+  # Acceptor project
+  acceptor_shortName:
+    description: 'Acceptor project short name'
+    value: ${{ steps.load.outputs.acceptor_shortName }}
+  acceptor_rootDirectory:
+    description: 'Acceptor project root directory'
+    value: ${{ steps.load.outputs.acceptor_rootDirectory }}
+  acceptor_projectName:
+    description: 'Acceptor project name'
+    value: ${{ steps.load.outputs.acceptor_projectName }}
+  acceptor_testDirectory:
+    description: 'Acceptor test directory'
+    value: ${{ steps.load.outputs.acceptor_testDirectory }}
+  acceptor_testProjectName:
+    description: 'Acceptor test project name'
+    value: ${{ steps.load.outputs.acceptor_testProjectName }}
+  
+  # Processor project
+  processor_shortName:
+    description: 'Processor project short name'
+    value: ${{ steps.load.outputs.processor_shortName }}
+  processor_rootDirectory:
+    description: 'Processor project root directory'
+    value: ${{ steps.load.outputs.processor_rootDirectory }}
+  processor_projectName:
+    description: 'Processor project name'
+    value: ${{ steps.load.outputs.processor_projectName }}
+  processor_testDirectory:
+    description: 'Processor test directory'
+    value: ${{ steps.load.outputs.processor_testDirectory }}
+  processor_testProjectName:
+    description: 'Processor test project name'
+    value: ${{ steps.load.outputs.processor_testProjectName }}
+  
+  # Data project
+  data_shortName:
+    description: 'Data project short name'
+    value: ${{ steps.load.outputs.data_shortName }}
+  data_rootDirectory:
+    description: 'Data project root directory'
+    value: ${{ steps.load.outputs.data_rootDirectory }}
+  data_projectName:
+    description: 'Data project name'
+    value: ${{ steps.load.outputs.data_projectName }}
+  data_testDirectory:
+    description: 'Data test directory'
+    value: ${{ steps.load.outputs.data_testDirectory }}
+  data_testProjectName:
+    description: 'Data test project name'
+    value: ${{ steps.load.outputs.data_testProjectName }}
+
+  # List of all project keys
+  projectKeys:
+    description: 'Comma-separated list of all project keys'
+    value: ${{ steps.load.outputs.projectKeys }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Load all project configurations
+      id: load
+      shell: bash
+      run: |
+        CONFIG_FILE=".github/config/projects.yml"
+        
+        if [ ! -f "$CONFIG_FILE" ]; then
+          echo "::error::Configuration file not found: $CONFIG_FILE"
+          exit 1
+        fi
+        
+        echo "📦 Loading all project configurations from $CONFIG_FILE"
+        echo ""
+        
+        # Get all project keys
+        PROJECT_KEYS=$(yq '.projects | keys | .[]' "$CONFIG_FILE" | tr '\n' ',' | sed 's/,$//')
+        echo "projectKeys=$PROJECT_KEYS" >> $GITHUB_OUTPUT
+        echo "Found projects: $PROJECT_KEYS"
+        echo ""
+        
+        # Loop through each project and output its values
+        for PROJECT in $(yq '.projects | keys | .[]' "$CONFIG_FILE"); do
+          echo "── $PROJECT ──"
+          
+          SHORT_NAME=$(yq ".projects.${PROJECT}.shortName // \"\"" "$CONFIG_FILE")
+          ROOT_DIR=$(yq ".projects.${PROJECT}.rootDirectory // \"\"" "$CONFIG_FILE")
+          PROJECT_NAME=$(yq ".projects.${PROJECT}.projectName // \"\"" "$CONFIG_FILE")
+          TEST_DIR=$(yq ".projects.${PROJECT}.testDirectory // \"\"" "$CONFIG_FILE")
+          TEST_PROJECT=$(yq ".projects.${PROJECT}.testProjectName // \"\"" "$CONFIG_FILE")
+          
+          # Output with project prefix
+          echo "${PROJECT}_shortName=$SHORT_NAME" >> $GITHUB_OUTPUT
+          echo "${PROJECT}_rootDirectory=$ROOT_DIR" >> $GITHUB_OUTPUT
+          echo "${PROJECT}_projectName=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "${PROJECT}_testDirectory=$TEST_DIR" >> $GITHUB_OUTPUT
+          echo "${PROJECT}_testProjectName=$TEST_PROJECT" >> $GITHUB_OUTPUT
+          
+          echo "   shortName: $SHORT_NAME"
+          echo "   rootDirectory: $ROOT_DIR"
+          echo "   projectName: $PROJECT_NAME"
+          echo "   testDirectory: $TEST_DIR"
+          echo "   testProjectName: $TEST_PROJECT"
+          echo ""
+        done
+        
+        echo "✅ All configurations loaded successfully"

@@ -63,7 +63,7 @@ public class IntakeFunction(ILogger<IntakeFunction> logger, IValidationService v
 
             var createdRequest = await _repository.CreateRequestAsync(processRequest);
 
-            _logger.LogInformation("Successfully created request with ID: {RequestId}", createdRequest.Id);
+            _logger.LogInformation($"Successfully created request with ID: {createdRequest.Id}");
 
             var successResponse = req.CreateResponse(HttpStatusCode.Created);
             await successResponse.WriteAsJsonAsync(new
@@ -77,7 +77,7 @@ public class IntakeFunction(ILogger<IntakeFunction> logger, IValidationService v
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing request submission");
+            _logger.LogError(ex, $"Error processing request submission: {ex.Message}");
             return await CreateErrorResponse(req, HttpStatusCode.InternalServerError, "An error occurred while processing your request");
         }
     }

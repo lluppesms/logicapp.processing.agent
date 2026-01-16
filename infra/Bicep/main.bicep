@@ -10,6 +10,7 @@
 param appName string = ''
 param environmentCode string = 'azd'
 param location string = resourceGroup().location
+param instanceNumber string = '1'
 // param servicePlanName string = ''
 // param servicePlanResourceGroupName string = '' // if using an existing service plan in a different resource group
 // param servicePlanKind string = 'linux' // 'linux' or 'windows'
@@ -65,7 +66,12 @@ module resourceNames 'resourcenames.bicep' = {
   params: {
     appName: appName
     environmentCode: environmentCode
-    // environmentSpecificFunctionName: ''
+    instanceNumber: instanceNumber
+    functionAppName1: 'intake'
+    functionAppName2: 'accept'
+    functionAppName3: 'process'
+    functionAppName4: 'receive'
+    functionAppName5: 'analyze'
   }
 }
 // --------------------------------------------------------------------------------
@@ -73,8 +79,7 @@ module logAnalyticsWorkspaceModule 'modules/monitor/loganalytics.bicep' = {
   name: 'logAnalytics${deploymentSuffix}'
   params: {
     newLogAnalyticsName: resourceNames.outputs.logAnalyticsWorkspaceName
-    newWebApplicationInsightsName: resourceNames.outputs.webSiteAppInsightsName
-    // newFunctionApplicationInsightsName: '' // No longer deploying functions
+    newWebApplicationInsightsName: resourceNames.outputs.appInsightsName
     location: location
     tags: commonTags
   }
@@ -119,7 +124,7 @@ module appIdentityRoleAssignments './modules/iam/role-assignments.bicep' = if (a
     principalType: 'ServicePrincipal'
     cosmosName: cosmosModule.outputs.name
     keyVaultName: keyVaultModule.outputs.name
-    // storageAccountName: '' // No function storage needed
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
   }
 }
 
@@ -130,7 +135,7 @@ module adminUserRoleAssignments './modules/iam/role-assignments.bicep' = if (add
     principalType: 'User'
     cosmosName: cosmosModule.outputs.name
     keyVaultName: keyVaultModule.outputs.name
-    // storageAccountName: '' // No function storage needed
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
   }
 }
 
@@ -183,57 +188,42 @@ module keyVaultSecretOpenAI './modules/security/keyvault-secret.bicep' = {
   }
 }
 
-// // --------------------------------------------------------------------------------
-// // Service Plan for webapp and function
-// // --------------------------------------------------------------------------------
-// module appServicePlanModule './modules/webapp/websiteserviceplan.bicep' = {
-//   name: 'appServicePlan${deploymentSuffix}'
-//   params: {
-//     location: location
-//     commonTags: commonTags
-//     sku: servicePlanSku
-//     environmentCode: environmentCode
-//     appServicePlanName: servicePlanName == '' ? resourceNames.outputs.webSiteAppServicePlanName : servicePlanName
-//     existingServicePlanName: servicePlanName
-//     existingServicePlanResourceGroupName: servicePlanResourceGroupName
-//     webAppKind: servicePlanKind
-//   }
-// }
-
 // --------------------------------------------------------------------------------
 // Function Flex Consumption - Shared Infrastructure (App Service Plan, App Insights, Storage)
 // This is deployed once and shared by all function apps
 // --------------------------------------------------------------------------------
-module functionFlexServicePlanModule 'modules/functions/functionserviceplan.bicep' = {
-  name: 'functionFlexServicePlan${deploymentSuffix}'
+module flexFunctionResourcesModule 'modules/functions/functionresources.bicep' = {
+  name: 'flexFunctionResources${deploymentSuffix}'
   params: {
-    functionAppServicePlanName: resourceNames.outputs.functionFlexAppServicePlanName
-    functionInsightsName: resourceNames.outputs.functionFlexInsightsName
-    functionStorageAccountName: resourceNames.outputs.functionFlexStorageName
+    functionInsightsName: resourceNames.outputs.appInsightsName
+    functionStorageAccountName: resourceNames.outputs.storageAccountName
     location: location
     commonTags: commonTags
     workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId
-    deploymentSuffix: deploymentSuffix
   }
 }
 
 // --------------------------------------------------------------------------------
-// Function App 1 - Main Processing Function
+// Flex Function App 1 - Main Processing Function - Intake Processor
 // --------------------------------------------------------------------------------
-module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
-  name: 'functionFlexApp1${deploymentSuffix}'
+module functionApp1FlexModule 'modules/functions/functionflex.bicep' = {
+  name: 'flexFunction1${deploymentSuffix}'
   params: {
-    functionAppName: resourceNames.outputs.functionFlexAppName
-    functionAppServicePlanName: functionFlexServicePlanModule.outputs.appServicePlanName
-    functionInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
-    functionStorageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
-    deploymentStorageContainerName: functionFlexServicePlanModule.outputs.deploymentStorageContainerName
+    functionAppName: resourceNames.outputs.functionApp1.name
+    functionAppServicePlanName: resourceNames.outputs.functionApp1.servicePlanName
+    deploymentStorageContainerName: resourceNames.outputs.functionApp1.deploymentStorageContainerName
+    functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    addRoleAssignments: addRoleAssignments
+    appInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    keyVaultName: keyVaultModule.outputs.name
     location: location
     commonTags: commonTags
     deploymentSuffix: deploymentSuffix
     customAppSettings: {
       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
-      CosmosDb__ConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__ConnectionString__Unused: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
       CosmosDb__DatabaseName: cosmosDatabaseName
       CosmosDb__ContainerNames__Requests: processRequestsContainerName
       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
@@ -251,71 +241,46 @@ module functionFlexApp1Module 'modules/functions/functionflex.bicep' = {
   }
 }
 
-// Role assignments for Function App 1
-module functionFlexApp1RoleAssignments './modules/iam/role-assignments.bicep' = if (addRoleAssignments) {
-  name: 'functionFlexApp1-roles${deploymentSuffix}'
+// --------------------------------------------------------------------------------
+// Flex Function App 2 - Acceptor Function (Cosmos DB triggered intake processor)
+// --------------------------------------------------------------------------------
+module functionApp2FlexModule 'modules/functions/functionflex.bicep' = {
+  name: 'flexFunction2${deploymentSuffix}'
   params: {
-    identityPrincipalId: functionFlexApp1Module.outputs.functionAppPrincipalId
-    principalType: 'ServicePrincipal'
-    appInsightsName: functionFlexServicePlanModule.outputs.appInsightsName
-    storageAccountName: functionFlexServicePlanModule.outputs.storageAccountName
+    functionAppName: resourceNames.outputs.functionApp2.name
+    functionAppServicePlanName: resourceNames.outputs.functionApp2.servicePlanName
+    deploymentStorageContainerName: resourceNames.outputs.functionApp2.deploymentStorageContainerName
+    functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
+    addRoleAssignments: addRoleAssignments
+    appInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
+    storageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
     keyVaultName: keyVaultModule.outputs.name
+    location: location
+    commonTags: commonTags
+    deploymentSuffix: deploymentSuffix
+    customAppSettings: {
+      CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
+      CosmosDb__ConnectionString__Unused: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      CosmosDb__DatabaseName: cosmosDatabaseName
+      CosmosDb__ContainerNames__Requests: processRequestsContainerName
+      CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
+      // Settings for Function with Cosmos trigger -- no sub levels
+      CosmosDbDatabaseName: cosmosDatabaseName
+      CosmosDbContainerName: processRequestsContainerName
+      CosmosDbConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
+      // OpenAI settings
+      OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
+      OpenAI__Chat__Endpoint: OpenAI_Endpoint
+      OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=${keyVaultSecretOpenAI.outputs.secretName})'
+      OpenAI__Chat__ModelName: OpenAI_ModelName
+      OpenAI__Chat__Temperature: OpenAI_Temperature
+    }
   }
 }
-
-// // --------------------------------------------------------------------------------
-// module webSiteModule './modules/webapp/website.bicep' = {
-//   name: 'webSite${deploymentSuffix}'
-//   params: {
-//     webSiteName: resourceNames.outputs.webSiteName
-//     location: location
-//     commonTags: commonTags
-//     environmentCode: environmentCode
-//     webAppKind: servicePlanKind
-//     managedIdentityId: identity.outputs.managedIdentityId
-//     managedIdentityPrincipalId: identity.outputs.managedIdentityPrincipalId
-//     workspaceId: logAnalyticsWorkspaceModule.outputs.logAnalyticsWorkspaceId
-//     appServicePlanName: appServicePlanModule.outputs.name
-//     appServicePlanResourceGroupName: appServicePlanModule.outputs.resourceGroupName
-//     sharedAppInsightsInstrumentationKey: logAnalyticsWorkspaceModule.outputs.webAppInsightsInstrumentationKey
-//   }
-// }
-
-// // In a Linux app service, any nested JSON app key like AppSettings:MyKey needs to be
-// // configured in App Service as AppSettings__MyKey for the key name.
-// // In other words, any : should be replaced by __ (double underscore).
-// // NOTE: See https://learn.microsoft.com/en-us/azure/app-service/configure-common?tabs=portal
-// module webSiteAppSettingsModule './modules/webapp/websiteappsettings.bicep' = {
-//   name: 'webSiteAppSettings${deploymentSuffix}'
-//   params: {
-//     webAppName: webSiteModule.outputs.name
-//     appInsightsKey: logAnalyticsWorkspaceModule.outputs.webAppInsightsInstrumentationKey
-//     customAppSettings: {
-//       AppSettings__AppInsights_InstrumentationKey: logAnalyticsWorkspaceModule.outputs.webAppInsightsInstrumentationKey
-//       AppSettings__EnvironmentName: environmentCode
-//       ConnectionStrings__ApplicationInsights: logAnalyticsWorkspaceModule.outputs.webAppInsightsConnectionString
-//       // Cosmos DB settings (now configured directly in web app)
-//       CosmosDb__Endpoint: 'https://${cosmosModule.outputs.name}.documents.azure.com:443/'
-//       CosmosDb__ConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
-//       CosmosDb__DatabaseName: cosmosDatabaseName
-//       CosmosDb__ContainerNames__Requests: processRequestsContainerName
-//       CosmosDb__ContainerNames__ProcessTypes: processTypesContainerName
-//       // Settings for Function with Cosmos trigger -- no sub levels
-//       CosmosDbDatabaseName: cosmosDatabaseName
-//       CosmosDbContainerName: processRequestsContainerName
-//       CosmosDbConnectionString: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretCosmos.outputs.connectionStringSecretName})'
-//       // OpenAI settings (now configured directly in web app)
-//       OpenAI__Chat__DeploymentName: OpenAI_DeploymentName
-//       OpenAI__Chat__Endpoint: OpenAI_Endpoint
-//       OpenAI__Chat__ApiKey: '@Microsoft.KeyVault(SecretUri=${keyVaultSecretOpenAI.outputs.secretUri})'
-//       OpenAI__Chat__ModelName: OpenAI_ModelName
-//       OpenAI__Chat__Temperature: OpenAI_Temperature
-//     }
-//   }
-// }
 
 // --------------------------------------------------------------------------------
 output SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP_NAME string = resourceGroupName
-output FUNCTION1_HOST_NAME string = functionFlexApp1Module.outputs.hostname
-//output WEB_HOST_NAME string = webSiteModule.outputs.hostName
+output INTAKE_HOST_NAME string = functionApp1FlexModule.outputs.hostname
+output ACCEPTOR_FUNCTION_HOST_NAME string = functionApp2FlexModule.outputs.hostname

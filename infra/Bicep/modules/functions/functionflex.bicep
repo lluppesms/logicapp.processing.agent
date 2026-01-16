@@ -1,12 +1,19 @@
 // ----------------------------------------------------------------------------------------------------
-// This BICEP file will create an .NET 10 Isolated Azure Function
+// This BICEP file will create an .NET 10 Isolated Azure Flex Function
 // See: https://github.com/Azure-Samples/azure-functions-flex-consumption-samples/blob/main/IaC/bicep/main.bicep
+// Note that each flex function has to have it's own service plan, so that's in here also.
 // ----------------------------------------------------------------------------------------------------
 param functionAppName string
 param functionAppServicePlanName string
 param functionInsightsName string
 param functionStorageAccountName string
 param deploymentStorageContainerName string = ''
+
+@description('SKU name for App Service Plan')
+param appServicePlanSkuName string = 'FC1'
+
+@description('SKU tier for App Service Plan')
+param appServicePlanTier string = 'FlexConsumption'
 
 param customAppSettings object = {}
 
@@ -20,6 +27,11 @@ param maximumInstanceCount int = 50
 @allowed([512, 2048, 4096])
 param instanceMemoryMB int = 2048
 
+param addRoleAssignments bool = true
+param appInsightsName string
+param storageAccountName string
+param keyVaultName string
+
 param location string = resourceGroup().location
 param commonTags object = {}
 param deploymentSuffix string = ''
@@ -29,23 +41,33 @@ var templateTag = { TemplateFile: '~functionflex.bicep' }
 var azdTag = { 'azd-service-name': 'function' }
 var functionTags = union(commonTags, templateTag, azdTag)
 
-var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location))
-// Use provided container name from service plan module, or calculate a default
+var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location, functionAppServicePlanName))
+// Use provided container name or calculate a default
 var actualDeploymentContainerName = !empty(deploymentStorageContainerName) ? deploymentStorageContainerName : 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
 
 // --------------------------------------------------------------------------------
 resource applicationInsightsResource 'Microsoft.Insights/components@2020-02-02' existing = {
   name: functionInsightsName
 }
-var applicationInsightsConnectionString string = applicationInsightsResource.properties.ConnectionString
+var applicationInsightsConnectionString = applicationInsightsResource.properties.ConnectionString
 
 resource storageAccountResource 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: functionStorageAccountName
 }
-var storagePrimaryBlobEndpoint string = storageAccountResource.properties.primaryEndpoints.blob
+var storagePrimaryBlobEndpoint = storageAccountResource.properties.primaryEndpoints.blob
 
-resource appServiceResource 'Microsoft.Web/serverfarms@2023-12-01' existing = {
-  name: functionAppServicePlanName
+// Create the deployment blob container for Flex Consumption function app packages
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' existing = {
+  parent: storageAccountResource
+  name: 'default'
+}
+
+resource deploymentContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: actualDeploymentContainerName
+  properties: {
+    publicAccess: 'None'
+  }
 }
 
 var baseAppSettings = {
@@ -59,8 +81,26 @@ var baseAppSettings = {
 }
 
 // --------------------------------------------------------------------------------
+// App Service Plan for Flex Consumption functions
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+  name: functionAppServicePlanName
+  location: location
+  tags: functionTags
+  kind: 'functionapp'
+  sku: {
+    name: appServicePlanSkuName
+    tier: appServicePlanTier
+  }
+  properties: {
+    reserved: true
+  }
+}
+
 module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
-  name: 'flexapp${deploymentSuffix}'
+  name: '${functionAppName}${deploymentSuffix}'
+  dependsOn: [
+    deploymentContainer
+  ]
   params: {
     name: functionAppName
     location: location
@@ -69,7 +109,7 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
     managedIdentities: {
       systemAssigned: true
     }
-    serverFarmResourceId: appServiceResource.id
+    serverFarmResourceId: appServicePlan.id
     functionAppConfig: {
       deployment: {
         storage: {
@@ -96,6 +136,17 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
       name: 'appsettings'
       properties: union(baseAppSettings, customAppSettings)
     }]
+  }
+}
+
+module functionRoleAssignments '../iam/role-assignments.bicep' = if (addRoleAssignments) {
+  name: '${functionAppName}-roles${deploymentSuffix}'
+  params: {
+    identityPrincipalId: functionAppResource.outputs.systemAssignedMIPrincipalId
+    principalType: 'ServicePrincipal'
+    appInsightsName: appInsightsName
+    storageAccountName: storageAccountName
+    keyVaultName: keyVaultName
   }
 }
 

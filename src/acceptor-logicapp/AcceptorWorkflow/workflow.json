@@ -1,0 +1,137 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "actions": {
+      "For_each_document": {
+        "type": "Foreach",
+        "foreach": "@triggerBody()",
+        "actions": {
+          "Check_if_document_is_valid": {
+            "type": "If",
+            "expression": {
+              "and": [
+                {
+                  "not": {
+                    "equals": [
+                      "@items('For_each_document')?['id']",
+                      null
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "equals": [
+                      "@items('For_each_document')?['requestorName']",
+                      null
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "equals": [
+                      "@items('For_each_document')?['requestorEmail']",
+                      null
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "equals": [
+                      "@items('For_each_document')?['jobTitle']",
+                      null
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "equals": [
+                      "@items('For_each_document')?['processRequested']",
+                      null
+                    ]
+                  }
+                },
+                {
+                  "not": {
+                    "equals": [
+                      "@items('For_each_document')?['requiredCompletionDate']",
+                      null
+                    ]
+                  }
+                }
+              ]
+            },
+            "actions": {
+              "Compose_email_subject": {
+                "type": "Compose",
+                "inputs": "New Intake Request: @{items('For_each_document')?['processRequested']} - @{items('For_each_document')?['requestorName']}"
+              },
+              "Compose_email_body": {
+                "type": "Compose",
+                "inputs": "<!DOCTYPE html>\n<html>\n<head>\n    <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }\n        h2 { color: #0066cc; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }\n        .field { margin: 15px 0; }\n        .label { font-weight: bold; color: #555; }\n        .value { margin-left: 10px; }\n        .record-id { background-color: #f0f8ff; padding: 10px; border-left: 4px solid #0066cc; margin: 20px 0; }\n        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #888; }\n    </style>\n</head>\n<body>\n    <div class='container'>\n        <h2>New Intake Request</h2>\n        <p>A new intake request has been received and requires your attention.</p>\n        <div class='record-id'>\n            <span class='label'>Record ID:</span>\n            <span class='value'>@{items('For_each_document')?['id']}</span>\n        </div>\n        <div class='field'>\n            <span class='label'>Requestor Name:</span>\n            <span class='value'>@{items('For_each_document')?['requestorName']}</span>\n        </div>\n        <div class='field'>\n            <span class='label'>Requestor Email:</span>\n            <span class='value'><a href='mailto:@{items('For_each_document')?['requestorEmail']}'>@{items('For_each_document')?['requestorEmail']}</a></span>\n        </div>\n        <div class='field'>\n            <span class='label'>Job Title:</span>\n            <span class='value'>@{items('For_each_document')?['jobTitle']}</span>\n        </div>\n        <div class='field'>\n            <span class='label'>Process Requested:</span>\n            <span class='value'>@{items('For_each_document')?['processRequested']}</span>\n        </div>\n        <div class='field'>\n            <span class='label'>Required Completion Date:</span>\n            <span class='value'>@{formatDateTime(items('For_each_document')?['requiredCompletionDate'], 'yyyy-MM-dd')}</span>\n        </div>\n        @{if(empty(items('For_each_document')?['comments']), '', concat('<div class=\"field\"><span class=\"label\">Comments:</span><div class=\"value\" style=\"margin-top: 5px; padding: 10px; background-color: #f5f5f5; border-radius: 3px;\">', items('For_each_document')?['comments'], '</div></div>'))}\n        <div class='footer'>\n            <p>This is an automated notification from the Intake Processor system.</p>\n        </div>\n    </div>\n</body>\n</html>"
+              },
+              "Send_email": {
+                "type": "ApiConnection",
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "referenceName": "office365"
+                    }
+                  },
+                  "method": "post",
+                  "path": "/v2/Mail",
+                  "body": {
+                    "To": "@{appsetting('AdminEmailAddress')}",
+                    "Subject": "@{outputs('Compose_email_subject')}",
+                    "Body": "@{outputs('Compose_email_body')}",
+                    "Importance": "Normal"
+                  }
+                },
+                "runAfter": {
+                  "Compose_email_subject": [
+                    "Succeeded"
+                  ],
+                  "Compose_email_body": [
+                    "Succeeded"
+                  ]
+                }
+              }
+            },
+            "else": {
+              "actions": {
+                "Log_validation_error": {
+                  "type": "Compose",
+                  "inputs": "Validation failed for document ID: @{items('For_each_document')?['id']}"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "triggers": {
+      "When_a_document_is_created_or_modified": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "referenceName": "azurecosmosdb"
+            }
+          },
+          "method": "get",
+          "path": "/v2/cosmosdb/@{encodeURIComponent(appsetting('CosmosDbDatabaseName'))}/changefeed/@{encodeURIComponent(appsetting('CosmosDbContainerName'))}",
+          "queries": {
+            "maxItemsPerInvocation": 100
+          }
+        },
+        "recurrence": {
+          "frequency": "Second",
+          "interval": 10
+        },
+        "splitOn": "@triggerBody()"
+      }
+    },
+    "contentVersion": "1.0.0.0",
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

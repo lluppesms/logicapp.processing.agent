@@ -91,30 +91,14 @@ jobs:
       listFilesBeforeDeploy: true
 
 # ------------------------------------------------------------------------------------------------------------------------
-  build-acceptor-function:
-    name: Build Acceptor Function App
-    uses: ./.github/workflows/template-function-app-build.yml
-    if: inputs.functionAppAction != 'ignore'
-    secrets: inherit
+  deploy-acceptor-logicapp:
+    name: Deploy Acceptor Logic App ${{ inputs.deployEnvironment }}
+    uses: ./.github/workflows/template-logicapp-deploy.yml
+    if: inputs.logicAppAction == 'deploy'
     needs: [load-config]
-    with:
-      envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: ${{ needs.load-config.outputs.acceptor_rootDirectory }}
-      projectName: ${{ needs.load-config.outputs.acceptor_projectName }}
-      testDirectory: ${{ needs.load-config.outputs.acceptor_testDirectory }}
-      testProjectName: ${{ needs.load-config.outputs.acceptor_testProjectName }}
-      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
-      testApplication: true
-      listFilesAfterBuild: true
-
-  deploy-acceptor-function:
-    name: Deploy Acceptor Function App ${{ inputs.deployEnvironment }}
-    uses: ./.github/workflows/template-function-app-deploy.yml
-    if: inputs.functionAppAction == 'deploy'
-    needs: [load-config, build-acceptor-function]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
-      listFilesBeforeDeploy: true
+      logicAppSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
+      rootDirectory: 'src/acceptor-logicapp'
 

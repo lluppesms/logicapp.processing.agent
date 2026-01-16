@@ -1,0 +1,106 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# GHA Reusable Called Workflow to deploy a Logic App Standard
+# ------------------------------------------------------------------------------------------------------------------------
+# You need to set up secrets in the GitHub Secrets Repository before running these workflows.
+#   See readme.md for details
+# ------------------------------------------------------------------------------------------------------------------------
+name: z_template_logicapp_deploy
+run-name: Deploy Logic App
+on:
+  workflow_call:
+    inputs:
+      envCode:
+        required: true
+        type: string
+      logicAppSubName:
+        type: string
+        default: 'logicapp'
+      rootDirectory:
+        type: string
+        default: 'src/acceptor-logicapp'
+
+# ------------------------------------------------------------------------------------------------------------------------
+jobs:
+  deploy:
+    name: Deploy Logic App
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: ${{ inputs.envCode }}
+
+    env:
+      generatedAppEnvName: "${{ format('func-{0}{1}-{2}-{3}', vars.APP_NAME, vars.INSTANCE_NUMBER, inputs.logicAppSubName, inputs.envCode) }}"
+      #Bicep:
+      #  var sanitizedAppNameInstance   = replace(replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '-', ''), '_', '')
+      #  output functionApp2Name string = toLower('${resourceAbbreviations.functionApp}-${sanitizedAppNameInstance}-${functionAppName2}-${sanitizedEnvironment}')
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Login to Azure using OIDC
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Create Deployment Package
+      shell: bash
+      run: |
+        cd ${{ inputs.rootDirectory }}
+        zip -r ../logicapp-package.zip .
+        cd ..
+        ls -la logicapp-package.zip
+
+    - name: Deploy Logic App Workflows
+      shell: bash
+      run: |
+        az logicapp deployment source config-zip \
+          --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
+          --name ${{ env.generatedAppEnvName }} \
+          --src logicapp-package.zip
+
+    - name: Update Logic App Settings
+      shell: bash
+      run: |
+        # Get connection runtime URLs from the deployed connections
+        COSMOS_CONNECTION_ID=$(az resource list \
+          --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
+          --resource-type Microsoft.Web/connections \
+          --query "[?contains(name, 'azurecosmosdb')].id" -o tsv | head -1)
+        
+        OFFICE365_CONNECTION_ID=$(az resource list \
+          --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
+          --resource-type Microsoft.Web/connections \
+          --query "[?contains(name, 'office365')].id" -o tsv | head -1)
+        
+        if [ ! -z "$COSMOS_CONNECTION_ID" ]; then
+          COSMOS_RUNTIME_URL=$(az rest --method post \
+            --uri "${COSMOS_CONNECTION_ID}/listConnectionKeys?api-version=2016-06-01" \
+            --query "connectionRuntimeUrl" -o tsv)
+          
+          az functionapp config appsettings set \
+            --name ${{ env.generatedAppEnvName }} \
+            --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
+            --settings "CosmosDb_connectionRuntimeUrl=$COSMOS_RUNTIME_URL"
+        fi
+        
+        if [ ! -z "$OFFICE365_CONNECTION_ID" ]; then
+          OFFICE365_RUNTIME_URL=$(az rest --method post \
+            --uri "${OFFICE365_CONNECTION_ID}/listConnectionKeys?api-version=2016-06-01" \
+            --query "connectionRuntimeUrl" -o tsv)
+          
+          az functionapp config appsettings set \
+            --name ${{ env.generatedAppEnvName }} \
+            --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
+            --settings "office365_connectionRuntimeUrl=$OFFICE365_RUNTIME_URL"
+        fi
+      continue-on-error: true
+
+    - name: Logout and cleanup
+      shell: bash
+      run: |
+        az logout
+        az cache purge
+        az account clear

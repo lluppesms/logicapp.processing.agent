@@ -44,10 +44,10 @@ on:
         description: Update Cosmos DB
         default: True
         type: boolean
-      runSmokeTest:
-        description: Run Smoke Tests
-        default: false
-        type: boolean
+      # runSmokeTest:
+      #   description: Run Smoke Tests
+      #   default: false
+      #   type: boolean
 
 # ------------------------------------------------------------------------------------------------------------------------
 permissions:
@@ -117,31 +117,31 @@ jobs:
       listFilesBeforeDeploy: true
 
 # # ------------------------------------------------------------------------------------------------------------------------
-#   build-acceptor-function:
-#     name: Build Acceptor Function App
+#   build-processor-function:
+#     name: Build processor Function App
 #     uses: ./.github/workflows/template-function-app-build.yml
 #     if: inputs.functionAppAction != 'ignore'
 #     needs: [create-infra, deploy-intake-function]
 #     secrets: inherit
 #     with:
 #       envCode: ${{ inputs.deployEnvironment }}
-#       rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
-#       projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
-#       testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
-#       testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
+#       rootDirectory: '${{ vars.PROCESSOR_PROJECT_FOLDER_NAME }}'
+#       projectName: '${{ vars.PROCESSOR_PROJECT_NAME }}'
+#       testDirectory: '${{ vars.PROCESSOR_TEST_FOLDER_NAME }}'
+#       testProjectName: '${{ vars.PROCESSOR_TEST_PROJECT_NAME }}'
 #       testApplication: true
 #       listFilesAfterBuild: true
 
-#   deploy-acceptor-function:
-#     name: Deploy Acceptor Function
+#   deploy-processor-function:
+#     name: Deploy processor Function
 #     uses: ./.github/workflows/template-function-app-deploy.yml
 #     if: inputs.functionAppAction == 'deploy'
 #     # the login seems to crash if you try to deploy both web and function at the same time...???
-#     needs: build-acceptor-function
+#     needs: build-processor-function
 #     secrets: inherit
 #     with:
 #       envCode: ${{ inputs.deployEnvironment }}
-#       functionSubName: 'acceptor'
+#       functionSubName: 'processor'
 #       listFilesBeforeDeploy: true
       
 # ------------------------------------------------------------------------------------------------------------------------
@@ -170,14 +170,14 @@ jobs:
       functionSubName: 'acceptor'
       listFilesBeforeDeploy: true
 
-# ------------------------------------------------------------------------------------------------------------------------
-  run-smoke-test:
-    name: Smoke Test ${{ inputs.deployEnvironment }}
-    uses: ./.github/workflows/template-smoke-test.yml
-    if: inputs.runSmokeTest
-    needs: deploy-intake-function
-    secrets: inherit
-    with:
-      envCode: ${{ inputs.deployEnvironment }}
-      testPath: 'playwright/function-tests'
-      testType: 'function'
+# # ------------------------------------------------------------------------------------------------------------------------
+#   run-smoke-test:
+#     name: Smoke Test ${{ inputs.deployEnvironment }}
+#     uses: ./.github/workflows/template-smoke-test.yml
+#     if: inputs.runSmokeTest
+#     needs: deploy-intake-function
+#     secrets: inherit
+#     with:
+#       envCode: ${{ inputs.deployEnvironment }}
+#       testPath: 'playwright/function-tests'
+#       testType: 'function'

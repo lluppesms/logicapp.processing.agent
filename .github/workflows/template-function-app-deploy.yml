@@ -30,7 +30,7 @@ jobs:
       name: ${{ inputs.envCode }}
 
     env:
-      artifactName: functionapp
+      artifactName: '${{ inputs.functionSubName }}-functionapp'
       generatedAppEnvName: "${{ format('func-{0}{1}-{2}-{3}', vars.APP_NAME, vars.INSTANCE_NUMBER, inputs.functionSubName, inputs.envCode) }}"
       #Bicep:
       #  var sanitizedAppNameInstance   = replace(replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '-', ''), '_', '')

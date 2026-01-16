@@ -101,6 +101,7 @@ jobs:
       projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
       testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
       testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
+      functionSubName: 'intake'
       testApplication: true
       listFilesAfterBuild: true
 
@@ -129,6 +130,7 @@ jobs:
 #       projectName: '${{ vars.PROCESSOR_PROJECT_NAME }}'
 #       testDirectory: '${{ vars.PROCESSOR_TEST_FOLDER_NAME }}'
 #       testProjectName: '${{ vars.PROCESSOR_TEST_PROJECT_NAME }}'
+#       functionSubName: 'processor'
 #       testApplication: true
 #       listFilesAfterBuild: true
 
@@ -147,7 +149,7 @@ jobs:
 # ------------------------------------------------------------------------------------------------------------------------
   build-logicapp:
     name: Build Logic App
-    uses: ./.github/workflows/template-webapp-build.yml
+    uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.logicAppAction != 'ignore'
     secrets: inherit
     with:
@@ -156,6 +158,7 @@ jobs:
       projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
       testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
       testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
+      functionSubName: 'accept'
       testApplication: true
       listFilesAfterBuild: true
 

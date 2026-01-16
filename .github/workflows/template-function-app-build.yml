@@ -34,6 +34,10 @@ on:
         required: false
         type: boolean
         default: false
+      functionSubName: 
+        required: false
+        type: string
+        default: 'base'
   
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
@@ -46,7 +50,7 @@ jobs:
     env:
       CONFIGURATION: Release
       DOTNET_CORE_VERSION: 10.0.x
-      artifactName: functionapp
+      artifactName: '${{ inputs.functionSubName }}-functionapp'
       AZURE_WEBAPP_PACKAGE_PATH: ./output
 
     # Note: Publish test results action needs permission to write a check

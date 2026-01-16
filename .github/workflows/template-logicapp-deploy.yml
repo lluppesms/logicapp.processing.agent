@@ -80,7 +80,7 @@ jobs:
             --uri "${COSMOS_CONNECTION_ID}/listConnectionKeys?api-version=2016-06-01" \
             --query "connectionRuntimeUrl" -o tsv)
           
-          az functionapp config appsettings set \
+          az logicapp config appsettings set \
             --name ${{ env.generatedAppEnvName }} \
             --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
             --settings "CosmosDb_connectionRuntimeUrl=$COSMOS_RUNTIME_URL"
@@ -91,7 +91,7 @@ jobs:
             --uri "${OFFICE365_CONNECTION_ID}/listConnectionKeys?api-version=2016-06-01" \
             --query "connectionRuntimeUrl" -o tsv)
           
-          az functionapp config appsettings set \
+          az logicapp config appsettings set \
             --name ${{ env.generatedAppEnvName }} \
             --resource-group ${{ vars.RESOURCE_GROUP_NAME }} \
             --settings "office365_connectionRuntimeUrl=$OFFICE365_RUNTIME_URL"

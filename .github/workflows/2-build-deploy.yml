@@ -22,7 +22,7 @@ on:
           - build
           - deploy 
       functionAppAction:
-        description: Functions
+        description: Functions (intake only - acceptor is now Logic App)
         default: deploy 
         type: choice
         options:

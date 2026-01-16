@@ -135,6 +135,7 @@ jobs:
         variables: '[${{ toJSON(env) }},${{ toJSON(vars) }},${{ toJSON(secrets) }}]' # use environment & variables & secrets
 
     - name: Display Param File
+      if: ${{ inputs.runCreateInfra }}
       run: |-
         echo "##[group]Contents of ${{ inputs.templatePath }}${{ inputs.parameterFile }}"
         cat ${{ inputs.templatePath }}${{ inputs.parameterFile }}
@@ -143,6 +144,7 @@ jobs:
       
     - name: Azure Login
       uses: ./.github/actions/login-action
+      if: ${{ inputs.runCreateInfra }}
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}

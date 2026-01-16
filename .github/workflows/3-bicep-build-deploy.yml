@@ -90,7 +90,7 @@ jobs:
 
 # ------------------------------------------------------------------------------------------------------------------------
   build-intake-function:
-    name: Build Function App
+    name: Build Intake Function App
     uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.functionAppAction != 'ignore'
     needs: create-infra
@@ -105,7 +105,7 @@ jobs:
       listFilesAfterBuild: true
 
   deploy-intake-function:
-    name: Deploy Function
+    name: Deploy Intake Function
     uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.functionAppAction == 'deploy'
     # the login seems to crash if you try to deploy both web and function at the same time...???
@@ -116,6 +116,34 @@ jobs:
       functionSubName: 'intake'
       listFilesBeforeDeploy: true
 
+# # ------------------------------------------------------------------------------------------------------------------------
+#   build-acceptor-function:
+#     name: Build Acceptor Function App
+#     uses: ./.github/workflows/template-function-app-build.yml
+#     if: inputs.functionAppAction != 'ignore'
+#     needs: [create-infra, deploy-intake-function]
+#     secrets: inherit
+#     with:
+#       envCode: ${{ inputs.deployEnvironment }}
+#       rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
+#       projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
+#       testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
+#       testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
+#       testApplication: true
+#       listFilesAfterBuild: true
+
+#   deploy-acceptor-function:
+#     name: Deploy Acceptor Function
+#     uses: ./.github/workflows/template-function-app-deploy.yml
+#     if: inputs.functionAppAction == 'deploy'
+#     # the login seems to crash if you try to deploy both web and function at the same time...???
+#     needs: build-acceptor-function
+#     secrets: inherit
+#     with:
+#       envCode: ${{ inputs.deployEnvironment }}
+#       functionSubName: 'acceptor'
+#       listFilesBeforeDeploy: true
+      
 # ------------------------------------------------------------------------------------------------------------------------
   build-logicapp:
     name: Build Logic App
@@ -133,12 +161,13 @@ jobs:
 
   deploy-logicapp:
     name: Deploy LogicApp ${{ inputs.deployEnvironment }}
-    uses: ./.github/workflows/template-webapp-deploy.yml
+    uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.logicAppAction == 'deploy'
     needs: build-logicapp
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
+      functionSubName: 'acceptor'
       listFilesBeforeDeploy: true
 
 # ------------------------------------------------------------------------------------------------------------------------

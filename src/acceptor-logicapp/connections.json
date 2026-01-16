@@ -5,7 +5,7 @@
         "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/documentdb"
       },
       "connection": {
-        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/azurecosmosdb"
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/azurecosmosdb-@{appsetting('WORKFLOWS_LOGIC_APP_NAME')}"
       },
       "connectionRuntimeUrl": "@{appsetting('CosmosDb_connectionRuntimeUrl')}",
       "authentication": {
@@ -17,7 +17,7 @@
         "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/providers/Microsoft.Web/locations/@{appsetting('WORKFLOWS_LOCATION_NAME')}/managedApis/office365"
       },
       "connection": {
-        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/office365"
+        "id": "/subscriptions/@{appsetting('WORKFLOWS_SUBSCRIPTION_ID')}/resourceGroups/@{appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')}/providers/Microsoft.Web/connections/office365-@{appsetting('WORKFLOWS_LOGIC_APP_NAME')}"
       },
       "connectionRuntimeUrl": "@{appsetting('office365_connectionRuntimeUrl')}",
       "authentication": {

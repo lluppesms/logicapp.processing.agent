@@ -117,6 +117,10 @@ resource logicApp 'Microsoft.Web/sites@2023-12-01' = {
           value: subscription().tenantId
         }
         {
+          name: 'WORKFLOWS_LOGIC_APP_NAME'
+          value: logicAppName
+        }
+        {
           name: 'CosmosDbDatabaseName'
           value: cosmosDbDatabaseName
         }

@@ -24,6 +24,11 @@ permissions:
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
+  # load the project configuration variables once for all jobs
+  load-config:
+    uses: ./.github/workflows/template-load-config.yml
+
+  # ------------------------------------------------------------------------------------------------------------------------
   scan-code:
     name: Scan Source Code
     uses: ./.github/workflows/template-scan-code.yml
@@ -33,29 +38,33 @@ jobs:
       runGHASScan: true
 
 # ------------------------------------------------------------------------------------------------------------------------
-  build-logicapp:
-    name: Build Logic App
-    uses: ./.github/workflows/template-webapp-build.yml
+  build-function:
+    name: Build Intake Function App
+    uses: ./.github/workflows/template-function-app-build.yml
     secrets: inherit
+    needs: [load-config]
     with:
       envCode: 'dev'
-      rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
-      testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
+      rootDirectory: ${{ needs.load-config.outputs.intake_rootDirectory }}
+      projectName: ${{ needs.load-config.outputs.intake_projectName }}
+      testDirectory: ${{ needs.load-config.outputs.intake_testDirectory }}
+      testProjectName: ${{ needs.load-config.outputs.intake_testProjectName }}
+      functionSubName: ${{ needs.load-config.outputs.intake_shortName }}
       testApplication: true
       listFilesAfterBuild: true
 
 # ------------------------------------------------------------------------------------------------------------------------
-  build-function:
-    name: Build Function App
+  build-logicapp:
+    name: Build Acceptor Logic App
     uses: ./.github/workflows/template-function-app-build.yml
     secrets: inherit
+    needs: [load-config]
     with:
       envCode: 'dev'
-      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
-      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
+      rootDirectory: ${{ needs.load-config.outputs.acceptor_rootDirectory }}
+      projectName: ${{ needs.load-config.outputs.acceptor_projectName }}
+      testDirectory: ${{ needs.load-config.outputs.acceptor_testDirectory }}
+      testProjectName: ${{ needs.load-config.outputs.acceptor_testProjectName }}
+      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
       testApplication: true
       listFilesAfterBuild: true

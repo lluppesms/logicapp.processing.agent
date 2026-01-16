@@ -1,0 +1,31 @@
+# Project Configuration for GitHub Actions
+# These values are used across multiple workflows to keep paths consistent
+
+projects:
+  intake:
+    shortName: 'intake'
+    rootDirectory: 'src/intake-function'
+    projectName: 'Processor.Agent.Intake'
+    testDirectory: 'tests/intake-function'
+    testProjectName: 'Processor.Agent.Intake.Tests'
+
+  acceptor:
+    shortName: 'acceptor'
+    rootDirectory: 'src/acceptor-logicapp'
+    projectName: 'Processor.Agent.Acceptor'
+    testDirectory: 'tests/acceptor-logicapp'
+    testProjectName: 'Processor.Agent.Acceptor.Tests'
+
+  processor:
+    shortName: 'processor'
+    rootDirectory: 'src/processor-function'
+    projectName: 'Processor.Agent.Processor'
+    testDirectory: 'tests/processor-function'
+    testProjectName: 'Processor.Agent.Processor.Tests'
+
+  data:
+    shortName: 'data'
+    rootDirectory: 'src/data'
+    projectName: 'Processor.Agent.Data'
+    testDirectory: ''
+    testProjectName: ''

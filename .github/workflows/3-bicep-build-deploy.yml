@@ -63,6 +63,11 @@ permissions:
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
+  # load the project configuration variables once for all jobs
+  load-config:
+    uses: ./.github/workflows/template-load-config.yml
+
+  # ------------------------------------------------------------------------------------------------------------------------
   scan-code:
     name: Scan Source Code
     uses: ./.github/workflows/template-scan-code.yml
@@ -93,15 +98,15 @@ jobs:
     name: Build Intake Function App
     uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.functionAppAction != 'ignore'
-    needs: create-infra
+    needs: [load-config, create-infra]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.INTAKE_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.INTAKE_PROJECT_NAME }}'
-      testDirectory: '${{ vars.INTAKE_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.INTAKE_TEST_PROJECT_NAME }}'
-      functionSubName: 'intake'
+      rootDirectory: ${{ needs.load-config.outputs.intake_rootDirectory }}
+      projectName: ${{ needs.load-config.outputs.intake_projectName }}
+      testDirectory: ${{ needs.load-config.outputs.intake_testDirectory }}
+      testProjectName: ${{ needs.load-config.outputs.intake_testProjectName }}
+      functionSubName:  ${{ needs.load-config.outputs.intake_shortName }}
       testApplication: true
       listFilesAfterBuild: true
 
@@ -109,12 +114,11 @@ jobs:
     name: Deploy Intake Function
     uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.functionAppAction == 'deploy'
-    # the login seems to crash if you try to deploy both web and function at the same time...???
-    needs: build-intake-function
+    needs: [load-config, build-intake-function]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      functionSubName: 'intake'
+      functionSubName: ${{ needs.load-config.outputs.intake_shortName }}
       listFilesBeforeDeploy: true
 
 # # ------------------------------------------------------------------------------------------------------------------------
@@ -122,15 +126,15 @@ jobs:
 #     name: Build processor Function App
 #     uses: ./.github/workflows/template-function-app-build.yml
 #     if: inputs.functionAppAction != 'ignore'
-#     needs: [create-infra, deploy-intake-function]
+#     needs: [load-config, deploy-intake-function]
 #     secrets: inherit
 #     with:
 #       envCode: ${{ inputs.deployEnvironment }}
-#       rootDirectory: '${{ vars.PROCESSOR_PROJECT_FOLDER_NAME }}'
-#       projectName: '${{ vars.PROCESSOR_PROJECT_NAME }}'
-#       testDirectory: '${{ vars.PROCESSOR_TEST_FOLDER_NAME }}'
-#       testProjectName: '${{ vars.PROCESSOR_TEST_PROJECT_NAME }}'
-#       functionSubName: 'processor'
+#       rootDirectory: ${{ needs.load-config.outputs.processor_rootDirectory }}
+#       projectName: ${{ needs.load-config.outputs.processor_projectName }}
+#       testDirectory: ${{ needs.load-config.outputs.processor_testDirectory }}
+#       testProjectName: ${{ needs.load-config.outputs.processor_testProjectName }}
+#       functionSubName: ${{ needs.load-config.outputs.processor_shortName }}
 #       testApplication: true
 #       listFilesAfterBuild: true
 
@@ -143,7 +147,7 @@ jobs:
 #     secrets: inherit
 #     with:
 #       envCode: ${{ inputs.deployEnvironment }}
-#       functionSubName: 'processor'
+#       functionSubName: ${{ needs.load-config.outputs.processor_shortName }}
 #       listFilesBeforeDeploy: true
       
 # ------------------------------------------------------------------------------------------------------------------------
@@ -152,13 +156,14 @@ jobs:
     uses: ./.github/workflows/template-function-app-build.yml
     if: inputs.logicAppAction != 'ignore'
     secrets: inherit
+    needs: [load-config]
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      rootDirectory: '${{ vars.ACCEPTOR_PROJECT_FOLDER_NAME }}'
-      projectName: '${{ vars.ACCEPTOR_PROJECT_NAME }}'
-      testDirectory: '${{ vars.ACCEPTOR_TEST_FOLDER_NAME }}'
-      testProjectName: '${{ vars.ACCEPTOR_TEST_PROJECT_NAME }}'
-      functionSubName: 'accept'
+      rootDirectory: ${{ needs.load-config.outputs.acceptor_rootDirectory }}
+      projectName: ${{ needs.load-config.outputs.acceptor_projectName }}
+      testDirectory: ${{ needs.load-config.outputs.acceptor_testDirectory }}
+      testProjectName: ${{ needs.load-config.outputs.acceptor_testProjectName }}
+      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
       testApplication: true
       listFilesAfterBuild: true
 
@@ -166,11 +171,11 @@ jobs:
     name: Deploy LogicApp ${{ inputs.deployEnvironment }}
     uses: ./.github/workflows/template-function-app-deploy.yml
     if: inputs.logicAppAction == 'deploy'
-    needs: build-logicapp
+    needs: [load-config, build-logicapp]
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      functionSubName: 'accept'
+      functionSubName: ${{ needs.load-config.outputs.acceptor_shortName }}
       listFilesBeforeDeploy: true
 
 # # ------------------------------------------------------------------------------------------------------------------------

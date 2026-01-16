@@ -37,15 +37,15 @@ gh variable set RESOURCE_GROUP_LOCATION -b eastus
 gh variable set RESOURCE_GROUP_PREFIX -b rg_lapagent
 gh variable set INSTANCE_NUMBER -b 1
 
-gh variable set INTAKE_PROJECT_FOLDER_NAME -b src/intake-function
-gh variable set INTAKE_PROJECT_NAME -b Processor.Agent.Intake
-gh variable set INTAKE_TEST_FOLDER_NAME -b src/intake-function-tests
-gh variable set INTAKE_TEST_PROJECT_NAME -b Processor.Agent.Intake.Tests
+# gh variable set INTAKE_PROJECT_FOLDER_NAME -b src/intake-function
+# gh variable set INTAKE_PROJECT_NAME -b Processor.Agent.Intake
+# gh variable set INTAKE_TEST_FOLDER_NAME -b src/intake-function-tests
+# gh variable set INTAKE_TEST_PROJECT_NAME -b Processor.Agent.Intake.Tests
 
-gh variable set ACCEPTOR_PROJECT_FOLDER_NAME -b src/acceptor-logicapp
-gh variable set ACCEPTOR_PROJECT_NAME -b Processor.Agent.Acceptor
-gh variable set ACCEPTOR_TEST_FOLDER_NAME -b src/acceptor-logicapp-tests
-gh variable set ACCEPTOR_TEST_PROJECT_NAME -b Processor.Agent.Acceptor.Tests
+# gh variable set ACCEPTOR_PROJECT_FOLDER_NAME -b src/acceptor-logicapp
+# gh variable set ACCEPTOR_PROJECT_NAME -b Processor.Agent.Acceptor
+# gh variable set ACCEPTOR_TEST_FOLDER_NAME -b src/acceptor-logicapp-tests
+# gh variable set ACCEPTOR_TEST_PROJECT_NAME -b Processor.Agent.Acceptor.Tests
 
 ```
 

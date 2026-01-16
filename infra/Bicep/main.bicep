@@ -211,6 +211,7 @@ module functionApp1FlexModule 'modules/functions/functionflex.bicep' = {
   params: {
     functionAppName: resourceNames.outputs.functionApp1.name
     functionAppServicePlanName: resourceNames.outputs.functionApp1.servicePlanName
+    deploymentStorageContainerName: resourceNames.outputs.functionApp1.deploymentStorageContainerName
     functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
     functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
     addRoleAssignments: addRoleAssignments
@@ -248,6 +249,7 @@ module functionApp2FlexModule 'modules/functions/functionflex.bicep' = {
   params: {
     functionAppName: resourceNames.outputs.functionApp2.name
     functionAppServicePlanName: resourceNames.outputs.functionApp2.servicePlanName
+    deploymentStorageContainerName: resourceNames.outputs.functionApp2.deploymentStorageContainerName
     functionInsightsName: flexFunctionResourcesModule.outputs.appInsightsName
     functionStorageAccountName: flexFunctionResourcesModule.outputs.storageAccountName
     addRoleAssignments: addRoleAssignments

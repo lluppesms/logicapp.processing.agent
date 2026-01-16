@@ -7,7 +7,7 @@ param functionAppName string
 param functionAppServicePlanName string
 param functionInsightsName string
 param functionStorageAccountName string
-//param deploymentStorageContainerName string = ''
+param deploymentStorageContainerName string = ''
 
 @description('SKU name for App Service Plan')
 param appServicePlanSkuName string = 'FC1'
@@ -42,19 +42,33 @@ var azdTag = { 'azd-service-name': 'function' }
 var functionTags = union(commonTags, templateTag, azdTag)
 
 var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location, functionAppServicePlanName))
-// Calculate a default container name from service plan module
-var actualDeploymentContainerName = 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
+// Use provided container name or calculate a default
+var actualDeploymentContainerName = !empty(deploymentStorageContainerName) ? deploymentStorageContainerName : 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
 
 // --------------------------------------------------------------------------------
 resource applicationInsightsResource 'Microsoft.Insights/components@2020-02-02' existing = {
   name: functionInsightsName
 }
-var applicationInsightsConnectionString string = applicationInsightsResource.properties.ConnectionString
+var applicationInsightsConnectionString = applicationInsightsResource.properties.ConnectionString
 
 resource storageAccountResource 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: functionStorageAccountName
 }
-var storagePrimaryBlobEndpoint string = storageAccountResource.properties.primaryEndpoints.blob
+var storagePrimaryBlobEndpoint = storageAccountResource.properties.primaryEndpoints.blob
+
+// Create the deployment blob container for Flex Consumption function app packages
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' existing = {
+  parent: storageAccountResource
+  name: 'default'
+}
+
+resource deploymentContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: actualDeploymentContainerName
+  properties: {
+    publicAccess: 'None'
+  }
+}
 
 var baseAppSettings = {
     AzureWebJobsStorage__accountName: functionStorageAccountName
@@ -84,6 +98,9 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 
 module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
   name: '${functionAppName}${deploymentSuffix}'
+  dependsOn: [
+    deploymentContainer
+  ]
   params: {
     name: functionAppName
     location: location

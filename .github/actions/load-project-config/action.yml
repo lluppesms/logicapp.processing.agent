@@ -7,8 +7,8 @@
 #   steps.config.outputs.intake_rootDirectory
 #   steps.config.outputs.acceptor_projectName
 # ------------------------------------------------------------------------------------------------------------------------
-name: 'Load Project Config'
-description: 'Loads all project configurations from .github/config/projects.yml'
+name: 'Load config/projects.yml'
+description: 'Loads project configurations from .github/config/projects.yml'
 
 outputs:
   # Intake project

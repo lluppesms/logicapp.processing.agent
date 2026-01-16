@@ -101,7 +101,7 @@ on:
 
 jobs:
   load:
-    name: Load All Project Configs
+    name: Load Project Config Settings
     runs-on: ubuntu-latest
     outputs:
       # Intake

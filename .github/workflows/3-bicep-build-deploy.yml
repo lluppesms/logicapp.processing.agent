@@ -22,7 +22,7 @@ on:
         type: boolean
       logicAppAction:
         description: Logic App
-        default: ignore 
+        default: deploy 
         type: choice
         options:
           - ignore

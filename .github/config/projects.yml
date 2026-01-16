@@ -1,31 +1,44 @@
+# ------------------------------------------------------------------------------------------------------------------------
 # Project Configuration for GitHub Actions
 # These values are used across multiple workflows to keep paths consistent
+# ------------------------------------------------------------------------------------------------------------------------
+# Usage in calling workflow:
+#   jobs:
+#     load-config:
+#       uses: ./.github/workflows/template-load-config.yml
+#     build:
+#       needs: load-config
+#       uses: ./.github/workflows/template-function-app-build.yml
+#       with:
+#         rootDirectory: ${{ needs.load-config.outputs.intake_rootDirectory }}
+#         projectName: ${{ needs.load-config.outputs.intake_projectName }}
+# ------------------------------------------------------------------------------------------------------------------------
 
 projects:
   intake:
     shortName: 'intake'
     rootDirectory: 'src/intake-function'
     projectName: 'Processor.Agent.Intake'
-    testDirectory: 'tests/intake-function'
+    testDirectory: 'src/intake-function-tests'
     testProjectName: 'Processor.Agent.Intake.Tests'
 
   acceptor:
-    shortName: 'acceptor'
+    shortName: 'accept'
     rootDirectory: 'src/acceptor-logicapp'
     projectName: 'Processor.Agent.Acceptor'
-    testDirectory: 'tests/acceptor-logicapp'
+    testDirectory: 'src/acceptor-logicapp-tests'
     testProjectName: 'Processor.Agent.Acceptor.Tests'
 
   processor:
     shortName: 'processor'
     rootDirectory: 'src/processor-function'
     projectName: 'Processor.Agent.Processor'
-    testDirectory: 'tests/processor-function'
+    testDirectory: 'src/processor-function-tests'
     testProjectName: 'Processor.Agent.Processor.Tests'
 
   data:
     shortName: 'data'
     rootDirectory: 'src/data'
     projectName: 'Processor.Agent.Data'
-    testDirectory: ''
-    testProjectName: ''
+    testDirectory: 'src/data-tests'
+    testProjectName: 'Processor.Agent.Data.Tests'

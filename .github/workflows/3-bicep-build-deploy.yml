@@ -21,7 +21,7 @@ on:
         default: true
         type: boolean
       logicAppAction:
-        description: Logic App
+        description: Logic Apps
         default: deploy 
         type: choice
         options:
@@ -29,7 +29,7 @@ on:
           - build
           - deploy 
       functionAppAction:
-        description: Function
+        description: Functions
         default: deploy 
         type: choice
         options:

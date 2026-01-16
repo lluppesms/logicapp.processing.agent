@@ -16,7 +16,9 @@ param dataStorageNameSuffix string = 'data'
 // --------------------------------------------------------------------------------
 var sanitizedEnvironment  = toLower(environmentCode)
 //var sanitizedAppName = replace(replace(replace(toLower('${appName}'), ' ', ''), '-', ''), '_', '')
-var sanitizedAppNameInstance = replace(replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '-', ''), '_', '')
+var sanitizedAppNameInstance = replace(replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '_', ''), '-', '')
+// var sanitizedAppInstanceNameWithDashes = replace(replace(toLower('${appName}${instanceNumber}'), ' ', ''), '_', '')
+
 var lowerFunctionAppName1 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName1}'), ' ', '')
 var lowerFunctionAppName2 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName2}'), ' ', '')
 var lowerFunctionAppName3 = replace(toLower('${sanitizedAppNameInstance}-${functionAppName3}'), ' ', '')
@@ -64,10 +66,10 @@ output userAssignedIdentityName string   = toLower('${resourceAbbreviations.mana
 // --------------------------------------------------------------------------------
 // Key Vaults and Storage Accounts can only be 24 characters long
 // Note - had to do an exception because I couldn't purge the old key vaults in prod which was in a different region...!
-output keyVaultName string = take('${resourceAbbreviations.keyVaultVaults}${sanitizedAppNameInstance}${sanitizedEnvironment}', 24)
-output storageAccountName string         = take('${resourceAbbreviations.storageStorageAccounts}${sanitizedAppNameInstance}${sanitizedEnvironment}${dataStorageNameSuffix}', 24)
-// output functionApp1StorageName string     = take('${sanitizedFunctionAppName1}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
-// output functionApp2StorageName string     = take('${sanitizedFunctionAppName2}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
-// output functionApp3StorageName string     = take('${sanitizedFunctionAppName3}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
-// output functionApp4StorageName string     = take('${sanitizedFunctionAppName4}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
-// output functionApp5StorageName string     = take('${sanitizedFunctionAppName5}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+output keyVaultName string               = take('${resourceAbbreviations.keyVaultVaults}${sanitizedAppNameInstance}${sanitizedEnvironment}', 24)
+output storageAccountName string         = take('${sanitizedAppNameInstance}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${dataStorageNameSuffix}', 24)
+// output functionApp1StorageName string    = take('${sanitizedFunctionAppName1}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+// output functionApp2StorageName string    = take('${sanitizedFunctionAppName2}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+// output functionApp3StorageName string    = take('${sanitizedFunctionAppName3}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+// output functionApp4StorageName string    = take('${sanitizedFunctionAppName4}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)
+// output functionApp5StorageName string    = take('${sanitizedFunctionAppName5}${resourceAbbreviations.storageStorageAccounts}${sanitizedEnvironment}${functionStorageNameSuffix}', 24)

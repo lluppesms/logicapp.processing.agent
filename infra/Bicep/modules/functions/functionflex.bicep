@@ -7,7 +7,7 @@ param functionAppName string
 param functionAppServicePlanName string
 param functionInsightsName string
 param functionStorageAccountName string
-param deploymentStorageContainerName string = ''
+//param deploymentStorageContainerName string = ''
 
 @description('SKU name for App Service Plan')
 param appServicePlanSkuName string = 'FC1'
@@ -41,9 +41,9 @@ var templateTag = { TemplateFile: '~functionflex.bicep' }
 var azdTag = { 'azd-service-name': 'function' }
 var functionTags = union(commonTags, templateTag, azdTag)
 
-var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location))
-// Use provided container name from service plan module, or calculate a default
-var actualDeploymentContainerName = !empty(deploymentStorageContainerName) ? deploymentStorageContainerName : 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
+var resourceToken = toLower(uniqueString(subscription().id, resourceGroup().name, location, functionAppServicePlanName))
+// Calculate a default container name from service plan module
+var actualDeploymentContainerName = 'app-package-${take(functionStorageAccountName, 32)}-${take(resourceToken, 7)}'
 
 // --------------------------------------------------------------------------------
 resource applicationInsightsResource 'Microsoft.Insights/components@2020-02-02' existing = {
@@ -83,7 +83,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 }
 
 module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
-  name: 'func${functionAppName}${deploymentSuffix}'
+  name: '${functionAppName}${deploymentSuffix}'
   params: {
     name: functionAppName
     location: location
@@ -123,7 +123,7 @@ module functionAppResource 'br/public:avm/res/web/site:0.16.0' = {
 }
 
 module functionRoleAssignments '../iam/role-assignments.bicep' = if (addRoleAssignments) {
-  name: 'func${functionAppName}-roles${deploymentSuffix}'
+  name: '${functionAppName}-roles${deploymentSuffix}'
   params: {
     identityPrincipalId: functionAppResource.outputs.systemAssignedMIPrincipalId
     principalType: 'ServicePrincipal'

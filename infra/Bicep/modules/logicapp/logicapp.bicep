@@ -79,10 +79,10 @@ resource logicApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
-      appSettings: union([
+      appSettings: [
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccountResource.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${listKeys(storageAccountResource.id, '2023-01-01').keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -132,10 +132,7 @@ resource logicApp 'Microsoft.Web/sites@2023-12-01' = {
           name: 'AdminEmailAddress'
           value: adminEmailAddress
         }
-      ], [for setting in items(customAppSettings): {
-        name: setting.key
-        value: setting.value
-      }])
+      ]
       netFrameworkVersion: 'v6.0'
       use32BitWorkerProcess: false
       ftpsState: 'Disabled'
@@ -153,14 +150,12 @@ resource cosmosDbConnection 'Microsoft.Web/connections@2016-06-01' = {
   tags: logicAppTags
   properties: {
     displayName: 'Cosmos DB Connection'
-    parameterValueType: 'Alternative'
     api: {
       id: subscriptionResourceId('Microsoft.Web/locations/managedApis', location, 'documentdb')
     }
-    alternativeParameterValues: {
+    parameterValues: {
       databaseAccount: cosmosDbAccountName
     }
-    customParameterValues: {}
   }
 }
 
@@ -181,8 +176,7 @@ resource office365Connection 'Microsoft.Web/connections@2016-06-01' = {
 // --------------------------------------------------------------------------------
 // Grant Logic App access to Cosmos DB connection
 resource cosmosDbConnectionAccessPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
-  name: logicAppIdentity.properties.principalId
-  parent: cosmosDbConnection
+  name: '${cosmosDbConnection.name}/${logicAppIdentity.name}'
   location: location
   properties: {
     principal: {
@@ -198,8 +192,7 @@ resource cosmosDbConnectionAccessPolicy 'Microsoft.Web/connections/accessPolicie
 // --------------------------------------------------------------------------------
 // Grant Logic App access to Office 365 connection
 resource office365ConnectionAccessPolicy 'Microsoft.Web/connections/accessPolicies@2016-06-01' = {
-  name: logicAppIdentity.properties.principalId
-  parent: office365Connection
+  name: '${office365Connection.name}/${logicAppIdentity.name}'
   location: location
   properties: {
     principal: {
@@ -213,22 +206,12 @@ resource office365ConnectionAccessPolicy 'Microsoft.Web/connections/accessPolici
 }
 
 // --------------------------------------------------------------------------------
-// Role assignment for Logic App to access Key Vault
-module keyVaultAccess '../security/keyvault-access.bicep' = if (addRoleAssignments) {
-  name: 'logicapp-keyvault-access${deploymentSuffix}'
-  params: {
-    keyVaultName: keyVaultName
-    principalId: logicAppIdentity.properties.principalId
-  }
-}
-
-// --------------------------------------------------------------------------------
 // Outputs
 output logicAppName string = logicApp.name
 output logicAppId string = logicApp.id
 output logicAppIdentityPrincipalId string = logicAppIdentity.properties.principalId
 output cosmosDbConnectionId string = cosmosDbConnection.id
-output cosmosDbConnectionRuntimeUrl string = cosmosDbConnection.properties.connectionRuntimeUrl
+output cosmosDbConnectionName string = cosmosDbConnection.name
 output office365ConnectionId string = office365Connection.id
-output office365ConnectionRuntimeUrl string = office365Connection.properties.connectionRuntimeUrl
+output office365ConnectionName string = office365Connection.name
 output hostname string = logicApp.properties.defaultHostName

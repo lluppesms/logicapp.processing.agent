@@ -33,26 +33,31 @@ output appInsightsName string             = toLower('${resourceAbbreviations.ins
 
 // --------------------------------------------------------------------------------
 output functionApp1 object = {
+    appName: functionAppName1
     name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName1}-${sanitizedEnvironment}')
     servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName1}-${sanitizedEnvironment}')
     deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName1}')
 }
 output functionApp2 object = {
+    appName: functionAppName2
     name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName2}-${sanitizedEnvironment}')
     servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName2}-${sanitizedEnvironment}')
     deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName2}')
 }
 output functionApp3 object = {
+    appName: functionAppName3
     name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName3}-${sanitizedEnvironment}')
     servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName3}-${sanitizedEnvironment}')
     deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName3}')
 }
 output functionApp4 object = {
+    appName: functionAppName4
     name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName4}-${sanitizedEnvironment}')
     servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName4}-${sanitizedEnvironment}')
     deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName4}')
 }
 output functionApp5 object = {
+    appName: functionAppName5
     name: toLower('${resourceAbbreviations.functionApp}-${lowerFunctionAppName5}-${sanitizedEnvironment}')
     servicePlanName: toLower('${resourceAbbreviations.webServerFarms}-${lowerFunctionAppName5}-${sanitizedEnvironment}')
     deploymentStorageContainerName: toLower('app-package-${lowerFunctionAppName5}')

@@ -167,7 +167,7 @@ jobs:
     secrets: inherit
     with:
       envCode: ${{ inputs.deployEnvironment }}
-      functionSubName: 'acceptor'
+      functionSubName: 'accept'
       listFilesBeforeDeploy: true
 
 # # ------------------------------------------------------------------------------------------------------------------------
